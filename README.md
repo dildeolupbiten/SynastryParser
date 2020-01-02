@@ -1,6 +1,6 @@
 # SynastryParser
 
-**SynastryParser** is a program uses with csv files that each of it's rows contains julian date, latitude and longitude values.
+**Synastry Parser** is a program uses csv files that contain julian date, latitude and longitude values.
 
 ## Availability
 
