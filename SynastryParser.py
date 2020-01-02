@@ -68,16 +68,6 @@ except ModuleNotFoundError:
     os.system("pip3 install xlwt")
     import xlwt
 try:
-    from dateutil import tz
-except ModuleNotFoundError:
-    os.system("pip3 install python-dateutil")
-    from dateutil import tz
-try:
-    from tzwhere import tzwhere
-except ModuleNotFoundError:
-    os.system("pip3 install tzwhere")
-    from tzwhere import tzwhere
-try:
     import shapely
 except ModuleNotFoundError:            
     select_module(
