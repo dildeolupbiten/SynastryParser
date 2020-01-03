@@ -61,13 +61,15 @@ When a planet like **"Sun"** and an aspect like **"conjunction"** are selected f
 
 **2.** If users want to put their files in a cloud system like Dropbox, it is recommended that the format of the excel files should be changed from *xlsx* to *ods* format.
 
-**3.** Please do not select all the check buttons at the same time.
+## Warnings
 
-**4.** You can select all the check buttons of different aspect types and the check button for ALL aspects, but while you are doing that, be sure that you didn't select the check buttons for planets.
+**1.** Please do not select all the check buttons at the same time.
 
-**5.** You can select an aspect check button and a planet check button at the same time. For example suppose you selected *Conjunction* aspect check button, you can select *Sun* check button from the given list. Even you can select *TWO ASPECTS check buttons and ONE PLANET check button* or *ONE ASPECT check button and TWO PLANETS check buttons*. I don't know after how many check buttons are selected the program will start freezing your computer. You should do attempts in order to learn when the program will freeze your computer. It depends on the physical properties of the computer.
+**2.** Users can select all the check buttons of different aspect types and the check button for ALL aspects, but while doing that, be sure that the check buttons for planets are not selected.
 
-**6.** After the computation is finished, you should wait a bit the spreadsheet file to be generated.
+**3.** Users can select an aspect check button and a planet check button at the same time. For example suppose a user selected **Conjunction** aspect check button, the user can select **Sun** check button from the given list. Even the user can select **TWO ASPECTS check buttons and ONE PLANET check button** or **ONE ASPECT check button and TWO PLANETS check buttons**. I don't know after how many check buttons are selected the program will start freezing the computers of users. Users should do attempts in order to learn when the program will freeze their computer. It also depends on the physical properties of the computer.
+
+**4.** After the computation is finished, you should wait a bit the spreadsheet file to be generated.
 
 ## Licenses
 
