@@ -67,7 +67,7 @@ When a planet like **"Sun"** and an aspect like **"conjunction"** are selected f
 
 **2.** Users can select all the check buttons of different aspect types and the check button for ALL aspects, but while doing that, be sure that the check buttons for planets are not selected.
 
-**3.** Users can select an aspect check button and a planet check button at the same time. For example suppose a user selected **Conjunction** aspect check button, the user can select **Sun** check button from the given list. Even the user can select **TWO ASPECTS check buttons and ONE PLANET check button** or **ONE ASPECT check button and TWO PLANETS check buttons**. I don't know after how many check buttons are selected the program will start freezing the computers of users. Users should do attempts in order to learn when the program will freeze their computer. It also depends on the physical properties of the computer.
+**3.** Users can select an aspect check button and a planet check button at the same time. For example suppose a user selected **Conjunction** aspect check button, the user can select **Sun** check button from the given list. Even the user can select **TWO ASPECT check buttons and ONE PLANET check button** or **ONE ASPECT check button and TWO PLANET check buttons**. I don't know after how many check buttons are selected the program will start freezing the computers of users. Users should do attempts in order to learn when the program will freeze their computer. It also depends on the physical properties of the computer.
 
 **4.** After the computation is finished, you should wait a bit the spreadsheet file to be generated.
 
