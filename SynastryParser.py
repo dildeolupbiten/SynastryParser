@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 import os
 import sys
@@ -672,7 +672,7 @@ class Spreadsheet(xlwt.Workbook):
 class Plot:
 
     @staticmethod
-    def __plt(_x_label="Year", _y_label="People", _title="x / y"):
+    def __plt(_x_label="Year", _y_label="", _title="x / y"):
         plt.grid(
             True,
             color="black",
@@ -694,7 +694,7 @@ class Plot:
                 label="Age Difference"
             )
             n += 2
-        cls.__plt()
+        cls.__plt(_y_label="Number of couple")
         
     @classmethod
     def rotating_labels(cls, *args):
@@ -725,7 +725,7 @@ class Plot:
             wspace=0.2,
             hspace=0
         )
-        Plot.__plt()
+        Plot.__plt(_y_label="Number of people")
       
     
 def frequency(l: list = [], d: dict = {}):
