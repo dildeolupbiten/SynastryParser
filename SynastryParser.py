@@ -94,6 +94,8 @@ except ModuleNotFoundError:
     
 swe.set_ephe_path(os.path.join(os.getcwd(), "Eph"))
 
+URL = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+
 CONJUNCTION = 10
 SEMI_SEXTILE = 3
 SEMI_SQUARE = 3
@@ -735,7 +737,7 @@ def frequency(l: list = [], d: dict = {}):
 
 
 def year_frequency():
-    url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+    url = URL
     diffs = []
     data = [
         [float(j) for j in i.decode().split(",")[1:6]] +
@@ -778,7 +780,7 @@ def year_frequency():
     
     
 def age_differences_frequency():
-    url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+    url = URL
     age_diffs = []
     age_diff_freq = {i: 0 for i in range(42)}
     data = [
@@ -918,7 +920,7 @@ class App(tk.Menu):
         self.button.pack()
     
     def create_control_group(self):
-        url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+        url = URL
         data = [
             [int(j) for j in i.decode().split(",")[1:6]][0]
             for i in urllib.request.urlopen(url)
