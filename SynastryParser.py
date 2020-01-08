@@ -851,7 +851,7 @@ class App(tk.Menu):
             n = time.time()
             c = 0
             num = 1
-            logging.info(f"Number of charts: {s}")
+            logging.info(f"Number of records: {s}")
             logging.info(f"Selected: {', '.join(self.selected)}")
             logging.info(
                 f"Orb Factor: \u00b1 "\
