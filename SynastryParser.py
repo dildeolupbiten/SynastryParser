@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 import os
 import sys
@@ -90,12 +90,22 @@ except ModuleNotFoundError:
         "pyswisseph",
         [i for i in os.listdir(whl_path) if "pyswisseph" in i]
     )
-    import swisseph as swe    
+    import swisseph as swe
+try:
+    from dateutil import tz
+except ModuleNotFoundError:
+    os.system("pip3 install python-dateutil")
+    from dateutil import tz
+try:
+    from tzwhere import tzwhere
+except ModuleNotFoundError:
+    os.system("pip3 install tzwhere")
+    from tzwhere import tzwhere    
     
 swe.set_ephe_path(os.path.join(os.getcwd(), "Eph"))
 
 URL = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
-
+FILENAME = URL.split("/")[-1].split(".")[0]
 CONJUNCTION = 10
 SEMI_SEXTILE = 3
 SEMI_SQUARE = 3
@@ -107,7 +117,6 @@ SESQUIQUADRATE = 3
 BIQUINTILE = 2
 QUINCUNX = 3
 OPPOSITE = 10
-
 SIGNS = [
     "Aries",
     "Taurus",
@@ -122,7 +131,6 @@ SIGNS = [
     "Aquarius",
     "Pisces"
 ]
-
 ANTISCIA = {
     SIGNS[0]: SIGNS[5],
     SIGNS[1]: SIGNS[4],
@@ -137,7 +145,6 @@ ANTISCIA = {
     SIGNS[10]: SIGNS[7],
     SIGNS[11]: SIGNS[6]
 }
-
 CONTRA_ANTISCIA = {
     SIGNS[0]: SIGNS[11],
     SIGNS[1]: SIGNS[10],
@@ -152,7 +159,6 @@ CONTRA_ANTISCIA = {
     SIGNS[10]: SIGNS[1],
     SIGNS[11]: SIGNS[0]
 }
-
 OBJECTS = [
     "Sun",
     "Moon",
@@ -170,7 +176,6 @@ OBJECTS = [
     "Asc.",
     "MC"
 ]
-
 ASPECTS = [
     "Conjunction",
     "Semi_Sextile",
@@ -185,7 +190,6 @@ ASPECTS = [
     "Opposite",
     "null"
 ]
-
 ANGLE = {
     ASPECTS[0]: 0,
     ASPECTS[1]: 30,
@@ -199,14 +203,13 @@ ANGLE = {
     ASPECTS[9]: 150,
     ASPECTS[10]: 180,
 }
-
 SST = {
     SIGNS[i]: 30 * i
     for i in range(len(SIGNS))
 }
-    
-    
-def info(s, c, n, obj: str = ""):
+
+
+def info(s, c, n):
     sys.stdout.write(
         "\r|{}{}| {} %, {} c, {} s estimated, {} c/s, {} s left"
         .format(
@@ -220,6 +223,135 @@ def info(s, c, n, obj: str = ""):
         )
     )
     sys.stdout.flush()
+    
+
+def julday(
+        year: int = 0,
+        month: int = 0,
+        day: int = 0,
+        hour: int = 0,
+        minute: int = 0,
+        second: int = 0
+):
+    jd = swe.julday(
+        year,
+        month,
+        day,
+        hour + (minute / 60) + (second / 3600),
+        swe.GREG_CAL
+    )
+    deltat = swe.deltat(jd)
+    return {
+        "JD": round(jd + deltat, 6),
+        "TT": round(deltat * 86400, 1)
+    }
+
+
+def from_local_to_utc(
+        year: int = 0,
+        month: int = 0,
+        day: int = 0,
+        hour: int = 0,
+        minute: int = 0,
+        lat: float = 0,
+        lon: float = 0
+):
+    tzw = tzwhere.tzwhere()
+    timezone = tzw.tzNameAt(lat, lon)
+    local_zone = tz.gettz(timezone)
+    utc_zone = tz.gettz("UTC")
+    if hour == 24:
+        hour = 0
+    global_time = dt.strptime(
+        f"{year}-{month}-{day} {hour}:{minute}:00", "%Y-%m-%d %H:%M:%S"
+    )
+    local_time = global_time.replace(tzinfo=local_zone)
+    utc_time = local_time.astimezone(utc_zone)
+    return utc_time.hour, utc_time.minute, utc_time.second
+
+
+def convert_raw_data():
+    url = URL
+    data = [
+        [float(j) for j in i.decode().split(",")[1:6]] +
+        [float(i.decode().split(",")[-4])] +
+        [float(i.decode().split(",")[-5]) * -1]
+        for i in urllib.request.urlopen(url)
+    ]
+    try:
+        output = open(f"{FILENAME}.csv", "r+")
+    except FileNotFoundError:
+        output = open(f"{FILENAME}.csv", "w+")
+    readlines = output.readlines()
+    count = len(readlines)
+    size = len(data)
+    now = time.time()
+    for i in range(len(readlines), len(data)):
+        utc_hour, utc_minute, utc_second = from_local_to_utc(
+            year=int(data[i][0]),
+            month=int(data[i][1]),
+            day=int(data[i][2]),
+            hour=int(data[i][3]),
+            minute=int(data[i][4]),
+            lat=data[i][5],
+            lon=data[i][6]
+        )
+        jd = julday(
+            year=int(data[i][0]),
+            month=int(data[i][1]),
+            day=int(data[i][2]),
+            hour=utc_hour,
+            minute=utc_minute,
+            second=utc_second
+        )
+        output.write(f"{jd['JD']},{data[i][-2]},{data[i][-1]}\n")
+        output.flush()
+        count += 1
+        info(s=size, c=count, n=now)
+    print()
+    
+    
+def create_control_group(self):
+        url = URL
+        data = [
+            [int(j) for j in i.decode().split(",")[1:6]][0]
+            for i in urllib.request.urlopen(url)
+        ]
+        males = [data[i] for i in range(0, len(data), 2)]
+        females = [data[i] for i in range(1, len(data), 2)]
+        temp_females = [i for i in females]
+        count = 2
+        now = time.time()
+        try:
+            with open(f"{FILENAME}.csv", "r") as case:
+                logging.info("Creating control group...")
+                case_lines = case.readlines()
+                size = len(case_lines)
+                with open(f"Random_{FILENAME}.csv", "w") \
+                        as control:
+                    for i, male in enumerate(males):
+                        for j, female in enumerate(temp_females):
+                            if females[i] == female and j != 0:
+                                try:
+                                    index = [
+                                        k * 2 + 1 for k in range(len(females)) 
+                                        if females[k] == female
+                                    ][1]
+                                    control.write(f"{case_lines[count]}")
+                                    control.write(f"{case_lines[index]}")
+                                    control.flush()
+                                except IndexError:
+                                    pass
+                                temp_females.pop(j)
+                                count += 2
+                                info(s=size, c=count, n=now)
+                                break
+                file = f"Random_{FILENAME}.csv"
+                length = len([i for i in open(file, "r")])
+                os.rename(file, file.replace("41832", f"{length}"))
+                logging.info("Completed creating control group.")
+        except FileNotFoundError:
+            logging.info(f"{FILENAME}.csv is not found.")
     
 
 class Chart:
@@ -850,18 +982,26 @@ class App(tk.Menu):
         self.toplevel_mode = None
         self.selected = []
         self.modes = ["Natal", "Natal"]
+        self.convert = tk.Menu(master=self, tearoff=False)
         self.create = tk.Menu(master=self, tearoff=False)
         self.frequency = tk.Menu(master=self, tearoff=False)
         self.settings = tk.Menu(master=self, tearoff=False)
         self.help = tk.Menu(master=self, tearoff=False)
+        self.add_cascade(label="Convert", menu=self.convert)
         self.add_cascade(label="Create", menu=self.create)
         self.add_cascade(label="Frequency", menu=self.frequency)
         self.add_cascade(label="Settings", menu=self.settings)
         self.add_cascade(label="Help", menu=self.help)
+        self.convert.add_command(
+            label=f"Convert {FILENAME}.dat",
+            command=lambda: threading.Thread(
+                target=convert_raw_data
+            ).start()
+        )
         self.create.add_command(
             label="Control Group",
             command=lambda: threading.Thread(
-                target=self.create_control_group
+                target=create_control_group
             ).start()
         )
         self.frequency.add_command(
@@ -917,50 +1057,7 @@ class App(tk.Menu):
         self.alignment.horz = xlwt.Alignment.HORZ_CENTER
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
-        self.button.pack()
-    
-    def create_control_group(self):
-        url = URL
-        data = [
-            [int(j) for j in i.decode().split(",")[1:6]][0]
-            for i in urllib.request.urlopen(url)
-        ]
-        males = [data[i] for i in range(0, len(data), 2)]
-        females = [data[i] for i in range(1, len(data), 2)]
-        temp_females = [i for i in females]
-        count = 2
-        now = time.time()
-        try:
-            with open("Gau_Partners_A_to_M_41832.csv", "r") as case:
-                logging.info("Creating control group...")
-                case_lines = case.readlines()
-                size = len(case_lines)
-                with open("Random_Gau_Partners_A_to_M_41832.csv", "w") \
-                        as control:
-                    for i, male in enumerate(males):
-                        for j, female in enumerate(temp_females):
-                            if females[i] == female and j != 0:
-                                try:
-                                    index = [
-                                        k * 2 + 1 for k in range(len(females)) 
-                                        if females[k] == female
-                                    ][1]
-                                    control.write(f"{case_lines[count]}")
-                                    control.write(f"{case_lines[index]}")
-                                    control.flush()
-                                except IndexError:
-                                    pass
-                                temp_females.pop(j)
-                                count += 2
-                                info(s=size, c=count, n=now)
-                                break
-                file = "Random_Gau_Partners_A_to_M_41832.csv"
-                length = len([i for i in open(file, "r")])
-                os.rename(file, file.replace("41832", f"{length}"))
-                logging.info("Completed creating control group.")
-        except FileNotFoundError:
-            logging.info(f"Gau_Partners_A_to_M_41832.csv is not found.")
-        
+        self.button.pack()    
     
     @staticmethod
     def get_data(sheet):
