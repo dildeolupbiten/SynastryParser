@@ -1,7 +1,6 @@
 # SynastryParser
 
-**SynastryParser** is a program uses csv files that contain julian date, latitude and longitude values. If users don't have an appropriate csv file they can use [ConvertGauquelinData
-](https://github.com/dildeolupbiten/ConvertGauquelinData) program to generate a csv file.
+**SynastryParser** is a program uses csv files that contain julian date, latitude and longitude values of Gauquelin marriage data.
 
 ## Availability
 
