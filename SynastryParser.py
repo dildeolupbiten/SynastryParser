@@ -779,7 +779,9 @@ class App(tk.Menu):
 
     def run(self):
         datas = lambda: [
-            self.get_data(xlrd.open_workbook(file).sheet_by_name("Sheet1"))
+            self.get_data(
+                xlrd.open_workbook(file).sheet_by_name("Sheet1")
+            )
             for file in sorted(os.listdir("."))
             if file.startswith("part") and file.endswith("xlsx")   
         ]
@@ -842,50 +844,57 @@ class App(tk.Menu):
             ASPECTS[9]: QUINCUNX,
             ASPECTS[10]: OPPOSITE,                        
         }
-        if len(selected) == 2:            
-            file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-                )
-            files = [i for i in open(file, "r").readlines()]
-            s = len(files)
-            n = time.time()
-            c = 0
-            num = 1
-            logging.info(f"Number of records: {s}")
-            logging.info(f"Selected: {', '.join(self.selected)}")
-            logging.info(
-                f"Orb Factor: \u00b1 "\
-                f"{aspects[self.selected[0].replace('-', '_')]}\u00b0"
-            )
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info("Calculation started.")
-            logging.info(f"Separating {len(files)} records into files...")
-            for i in range(len(files)):
-                if i % 400 == 0:
-                    parted = files[i:i + 400]              
-                    part = Spreadsheet()
-                    part.create_tables(
-                            file=parted,
-                            num=num,
-                            selected=[
-                                j.replace("-", "_") for j in self.selected
-                            ],
-                            modes=self.modes
+        if len(selected) == 2:
+            try:            
+                file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
                     )
-                    num += 1
-                c += 1
-                info(s=s, n=n, c=c)
-            print()
-            logging.info(
-                f"Completed separating {len(files)} records into files."
-            )
-            logging.info(f"Merging the separated files...")
-            self.run()
+                files = [i for i in open(file, "r").readlines()]
+                s = len(files)
+                n = time.time()
+                c = 0
+                num = 1
+                logging.info(f"Number of records: {s}")
+                logging.info(f"Selected: {', '.join(self.selected)}")
+                logging.info(
+                    f"Orb Factor: \u00b1 "\
+                    f"{aspects[self.selected[0].replace('-', '_')]}"\
+                    f"\u00b0"
+                )
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info("Calculation started.")
+                logging.info(
+                    f"Separating {len(files)} records into files..."
+                )
+                for i in range(len(files)):
+                    if i % 400 == 0:
+                        parted = files[i:i + 400]              
+                        part = Spreadsheet()
+                        part.create_tables(
+                                file=parted,
+                                num=num,
+                                selected=[
+                                    j.replace("-", "_") 
+                                    for j in self.selected
+                                ],
+                                modes=self.modes
+                        )
+                        num += 1
+                    c += 1
+                    info(s=s, n=n, c=c)
+                print()
+                logging.info(
+                    f"Completed separating {len(files)} records into files."
+                )
+                logging.info(f"Merging the separated files...")
+                self.run()
+            except:
+                pass
         else:
             msgbox.showinfo(
                 message="Please select one aspect and one planet."
             )
-               
+              
 
     def select_tables(self, checkbuttons: dict = {}):
         self.selected = []
