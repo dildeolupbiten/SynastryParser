@@ -23,11 +23,7 @@ python3 SynastryParser.py
 
 When all aspects and **"conjunction"** aspect is selected a table which is similar to below will be created. 
 
-![img6](https://user-images.githubusercontent.com/29302909/68792282-1ce8d400-065c-11ea-9d1a-c61740c80930.jpeg)
-
-When a planet like **"Sun"** and an aspect like **"conjunction"** are selected for detailed analysis, a table which is similar to below will be created.
-
-![img7](https://user-images.githubusercontent.com/29302909/68792530-8ff24a80-065c-11ea-9b76-9b9bde8eb5ec.jpeg)
+![img1](https://user-images.githubusercontent.com/29302909/72017449-c1f7e580-3276-11ea-88bf-c0f3cc51478a.jpeg)
 
 ## Notes
 
