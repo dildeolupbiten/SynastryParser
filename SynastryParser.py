@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 import os
 import sys
@@ -197,6 +197,22 @@ SST = {
     SIGNS[i]: 30 * i
     for i in range(len(SIGNS))
 }
+    
+    
+def info(s, c, n, obj: str = ""):
+    sys.stdout.write(
+        "\r|{}{}| {} %, {} c, {} s estimated, {} c/s, {} s left"
+        .format(
+            "\u25a0" * int(20 * c / s),
+            " " * (20 - int(20 * c / s)),
+            int(100 * c / s),
+            c,            
+            int(time.time() - n),
+            round(c / (time.time() - n), 1),
+            int(s / (c / (time.time() - n))) - int(time.time() - n)
+        )
+    )
+    sys.stdout.flush()
     
 
 class Chart:
@@ -476,22 +492,6 @@ def count_aspects_2(split_list: list = [], selected: list = []):
     return final
     
     
-def info(s, c, n, obj: str = ""):
-    sys.stdout.write(
-        "\r|{}{}| {} %, {} c, {} s estimated, {} c/s, {} s left"
-        .format(
-            "\u25a0" * int(20 * c / s),
-            " " * (20 - int(20 * c / s)),
-            int(100 * c / s),
-            c,            
-            int(time.time() - n),
-            round(c / (time.time() - n), 1),
-            int(s / (c / (time.time() - n))) - int(time.time() - n)
-        )
-    )
-    sys.stdout.flush()
-    
-    
 def read_files(file: list = [], selected: list = [], modes: list = []):
     file_list = []
     split_list = []
@@ -671,10 +671,18 @@ class App(tk.Menu):
         self.toplevel_mode = None
         self.selected = []
         self.modes = ["Natal", "Natal"]
+        self.create = tk.Menu(master=self, tearoff=False)
         self.settings = tk.Menu(master=self, tearoff=False)
         self.help = tk.Menu(master=self, tearoff=False)
+        self.add_cascade(label="Create", menu=self.create)
         self.add_cascade(label="Settings", menu=self.settings)
         self.add_cascade(label="Help", menu=self.help)
+        self.create.add_command(
+            label="Control Group",
+            command=lambda: threading.Thread(
+                target=self.create_control_group
+            ).start()
+        )
         self.settings.add_command(
             label="Include",
             command=lambda: self.open_toplevel(
@@ -710,7 +718,10 @@ class App(tk.Menu):
         self.button = tk.Button(
             master=self.master,
             text="Start",
-            command=lambda: self.start(self.selected)
+            command=lambda: threading.Thread(
+                target=self.start,
+                args=(self.selected, )
+            ).start()
         )
         self.style = xlwt.XFStyle()
         self.alignment = xlwt.Alignment()
@@ -718,6 +729,49 @@ class App(tk.Menu):
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
         self.button.pack()
+    
+    def create_control_group(self):
+        url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+        data = [
+            [int(j) for j in i.decode().split(",")[1:6]][0]
+            for i in urllib.request.urlopen(url)
+        ]
+        males = [data[i] for i in range(0, len(data), 2)]
+        females = [data[i] for i in range(1, len(data), 2)]
+        temp_females = [i for i in females]
+        count = 2
+        now = time.time()
+        try:
+            with open("Gau_Partners_A_to_M_41832.csv", "r") as case:
+                logging.info("Creating control group...")
+                case_lines = case.readlines()
+                size = len(case_lines)
+                with open("Random_Gau_Partners_A_to_M_41832.csv", "w") \
+                        as control:
+                    for i, male in enumerate(males):
+                        for j, female in enumerate(temp_females):
+                            if females[i] == female and j != 0:
+                                try:
+                                    index = [
+                                        k * 2 + 1 for k in range(len(females)) 
+                                        if females[k] == female
+                                    ][1]
+                                    control.write(f"{case_lines[count]}")
+                                    control.write(f"{case_lines[index]}")
+                                    control.flush()
+                                except IndexError:
+                                    pass
+                                temp_females.pop(j)
+                                count += 2
+                                info(s=size, c=count, n=now)
+                                break
+                file = "Random_Gau_Partners_A_to_M_41832.csv"
+                length = len([i for i in open(file, "r")])
+                os.rename(file, file.replace("41832", f"{length}"))
+                logging.info("Completed creating control group.")
+        except FileNotFoundError:
+            logging.info(f"Gau_Partners_A_to_M_41832.csv is not found.")
+        
     
     @staticmethod
     def get_data(sheet):
