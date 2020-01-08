@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 import os
 import sys
@@ -17,11 +17,9 @@ import urllib.request
 import tkinter.messagebox as msgbox
 
 from tkinter import filedialog
-from tkinter.ttk import Progressbar
 from datetime import datetime as dt
 
 logging.basicConfig(
-    filename="output.log",
     format="- %(levelname)s - %(asctime)s - %(message)s",
     level=logging.DEBUG,
     datefmt="%d.%m.%Y %H:%M:%S"
@@ -57,6 +55,7 @@ def select_module(module_name, module_files):
                 new_path = os.path.join(whl_path, module_files[5])
                 os.system(f"pip3 install {new_path}")
 
+
 try:
     import numpy as np
 except ModuleNotFoundError:
@@ -67,6 +66,11 @@ try:
 except ModuleNotFoundError:
     os.system("pip3 install xlwt")
     import xlwt
+try:
+    import xlrd
+except ModuleNotFoundError:
+    os.system("pip3 install xlrd")
+    import xlrd
 try:
     import shapely
 except ModuleNotFoundError:            
@@ -161,17 +165,17 @@ OBJECTS = [
 ]
 
 ASPECTS = [
-    "conjunction",
-    "semi_sextile",
-    "semi_square",
-    "sextile",
-    "quintile",
-    "square",
-    "trine",
-    "sesquiquadrate",
-    "biquintile",
-    "quincunx",
-    "opposite",
+    "Conjunction",
+    "Semi_Sextile",
+    "Semi_Square",
+    "Sextile",
+    "Quintile",
+    "Square",
+    "Trine",
+    "Sesquiquadrate",
+    "Biquintile",
+    "Quincunx",
+    "Opposite",
     "null"
 ]
 
@@ -435,25 +439,19 @@ def sum_arrays(*args):
     return result
 
 
-def count_aspects_1(file_list: list = []):
+def count_aspects_1(arg=(), file_list=[], count=1):
     result = ()
-    arg = ()
-    for i in file_list:
-        if file_list.index(i) != len(file_list) - 1:
-            if len(list(result)) == 0:
-                result = file_list[file_list.index(i)]
-            else:
-                result = [i for i in arg]
-                arg = ()
-            for j, k in zip(
-                    result, 
-                    file_list[file_list.index(i) + 1]
-            ):
-                aspect = {}
-                for (m, n), (o, p) in zip(j.items(), k.items()):
-                    aspect[m] = sum_arrays(n, p)
-                arg += aspect,
-    return result
+    for i in file_list[count:]:
+        for j, k in zip(arg, i):
+            aspect = {}
+            for (m, n), (o, p) in zip(j.items(), k.items()):
+                aspect[m] = sum_arrays(n, p)
+            result += aspect,
+        if count < len(file_list) - 1:
+            count += 1
+            return count_aspects_1(result, file_list, count)
+        else:
+            return result
     
 
 def count_aspects_2(split_list: list = [], selected: list = []):
@@ -478,75 +476,47 @@ def count_aspects_2(split_list: list = [], selected: list = []):
     return final
     
     
-def read_files(file: str = "", selected: list = [], modes: list = [], 
-        master=None
-):
+def info(s, c, n, obj: str = ""):
+    sys.stdout.write(
+        "\r|{}{}| {} %, {} c, {} s estimated, {} c/s, {} s left"
+        .format(
+            "\u25a0" * int(20 * c / s),
+            " " * (20 - int(20 * c / s)),
+            int(100 * c / s),
+            c,            
+            int(time.time() - n),
+            round(c / (time.time() - n), 1),
+            int(s / (c / (time.time() - n))) - int(time.time() - n)
+        )
+    )
+    sys.stdout.flush()
+    
+    
+def read_files(file: list = [], selected: list = [], modes: list = []):
     file_list = []
     split_list = []
-    if not selected or \
-            all(i not in selected for i in ASPECTS) or \
-            len(selected) == 1 and "all" in selected:
-        msgbox.showinfo(
-            message="No aspect selected."
+    n = len(file)
+    for i in range(0, n, 2):
+        male = [float(j) for j in file[i].strip().split(",")]
+        female = [float(j) for j in file[i + 1].strip().split(",")]
+        splitted = activate_selections(
+            selected=selected,
+            male=Chart(*male, "P").patterns(),
+            female=Chart(*female, "P").patterns(),
+            modes=modes
         )
-        return None
-    else:
-        try:
-            file = open(file, "r+")
-        except TypeError:
-            return None
-        readlines = file.readlines()
-        n = len(readlines)
-        logging.info(f"Number of charts: {n}")
-        logging.info(f"Selected: {', '.join(selected)}")
-        logging.info(f"Mode: {', '.join(modes)}")
-        logging.info("Calculation started.")
-        r = 0
-        t = time.time()
-        l = lambda: time.time()
-        s = lambda: f"{int(100 * r / n)} %, "\
-            f"{round((int(n / (r / (l() - t))) - int(l() - t)) / 60)} "\
-            f"minutes remaining."
-        pbar = Progressbar(
-            master=master,
-            orient="horizontal",
-            length=200,
-            mode="determinate"
-        )
-        pstring = tk.StringVar()
-        plabel = tk.Label(master=master, textvariable=pstring)
-        pbar.pack(side="left")
-        plabel.pack(side="left")
-        for i in range(0, n, 2):
-            male = [float(j) for j in readlines[i].strip().split(",")]
-            female = [float(j) for j in readlines[i + 1].strip().split(",")]
-            splitted = activate_selections(
-                selected=selected,
-                male=Chart(*male, "P").patterns(),
-                female=Chart(*female, "P").patterns(),
-                modes=modes
-            )
-            split_list.append(
-                splitted[1]
-            )
-            file_list.append(
-                splitted[0]
-            )
-            r += 2
-            if r != n:
-                pbar["value"] = r
-                pbar["maximum"] = n
-                pstring.set(s())
-            else:
-                pbar["value"] = n
-                pstring.set("100 %, 0 minutes remaining.")
-                logging.info("Calculation finished.")
-                master.update()
-                msgbox.showinfo(message="Calculation finished.")
-                pbar.destroy()
-                plabel.destroy()
-        return count_aspects_1(file_list), \
-            count_aspects_2(split_list, selected)
+        split_list.append(splitted[1])
+        file_list.append(splitted[0])
+    item1 = file_list[0]   
+    return count_aspects_1(item1, file_list, 1), \
+        count_aspects_2(split_list, selected)
+            
+            
+def font(name: str = "Arial", bold: bool = False):
+    f = xlwt.Font()
+    f.name = name
+    f.bold = bold
+    return f
 
 
 class Spreadsheet(xlwt.Workbook):
@@ -562,24 +532,14 @@ class Spreadsheet(xlwt.Workbook):
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
 
-    @staticmethod
-    def font(name: str = "Arial", bold: bool = False):
-        f = xlwt.Font()
-        f.name = name
-        f.bold = bold
-        return f
-
     def write(self, table: dict = {}, aspect: str = ""):
         temporary = {}
         transpose = np.transpose([i for i in table.values()])
         arr = [[int(j) for j in list(i)] for i in transpose]
         for i, j in enumerate(table):
             temporary[j] = arr[i]
-        if aspect == "all":
-            label = f"{aspect.upper()}"
-        else:
-            label = f"{aspect.upper()} "\
-                    f"(Orb Factor: +- {eval(aspect.upper())})"
+        label = f"{aspect.upper()} "\
+                f"(Orb Factor: \u00b1 {eval(aspect.upper())}\u00b0)"
         self.sheet.write_merge(
             r1=0 + self.size,
             r2=0 + self.size,
@@ -623,39 +583,25 @@ class Spreadsheet(xlwt.Workbook):
                 )
                 col += 1
             row += 1
-        self.size += len(table.keys()) + 3
-
-    def create_tables(self, file: str = "", selected: list = [], 
-            modes: list = [], master=None
+        self.size += len(table.keys()) + 3  
+        
+    def create_tables(self, file: list = [], selected: list = [], 
+            modes: list = [], num: int = 0
     ):
-        read = read_files(file, selected, modes, master)
-        self.style.font = self.font(bold=True)
+        read = read_files(file, selected, modes)
+        self.style.font = font(bold=True)
         self.sheet.write_merge(
             r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
         )
         self.sheet.write(r=0, c=1, label="1. Person", style=self.style)
         self.sheet.write(r=0, c=2, label="2. Person", style=self.style)
-        self.style.font = self.font(bold=False)
+        self.style.font = font(bold=False)
         self.sheet.write(r=1, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=1, c=2, label=modes[1], style=self.style)
         try:
             tables = read[0]
             signs = read[1]
             if tables:
-                if "all" in selected:
-                    result = {}
-                    for i in tables[0]:
-                        result[i] = []
-                        for j in tables:
-                            for k, v in j.items():
-                                if k == i:
-                                    result[i].append(v)
-                        result[i] = sum_arrays(*result[i])
-                    tables += result,
-                    self.write(
-                        tables[-1],
-                        "all",
-                    )
                 count = 0
                 for index, aspect in enumerate(ASPECTS):
                     if aspect in selected:
@@ -709,7 +655,7 @@ class Spreadsheet(xlwt.Workbook):
                                         row += 1
                                     self.size += 15
                                 count += 1
-                self.save("synastry.xlsx")                
+                self.save(f"part{str(num).zfill(3)}.xlsx")
             else:
                 pass
         except TypeError:
@@ -764,55 +710,220 @@ class App(tk.Menu):
         self.button = tk.Button(
             master=self.master,
             text="Start",
-            command=self.start
+            command=lambda: self.start(self.selected)
         )
+        self.style = xlwt.XFStyle()
+        self.alignment = xlwt.Alignment()
+        self.alignment.horz = xlwt.Alignment.HORZ_CENTER
+        self.alignment.vert = xlwt.Alignment.VERT_CENTER
+        self.style.alignment = self.alignment
         self.button.pack()
-
-    def start(self):
-        threading.Thread(
-            target=lambda: Spreadsheet().create_tables(
-                file=filedialog.askopenfilename(
-                    filetypes=[("CSV File", ".csv")]
-                ),
-                selected=self.selected,
-                modes=self.modes,
-                master=self.frame
+    
+    @staticmethod
+    def get_data(sheet):
+        data = []
+        for row in range(sheet.nrows):
+            for col in range(sheet.ncols):
+                data.append(([row, col], sheet.cell_value(row, col)))
+        return data
+    
+    
+    def special_cells(self, new_sheet, i):
+        self.style.font = font(bold=True)
+        if "Orb" in i[1]:      
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0], 
+                c1=i[0][1], 
+                c2=i[0][1] + 15,
+                label=i[1], 
+                style=self.style
             )
-        ).start()
+        elif "Person" in i[1]:
+            new_sheet.write(*i[0], i[1], style=self.style)
+        elif "Mode" in i[1]:
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0] + 1, 
+                c1=i[0][1], 
+                c2=i[0][1],
+                label=i[1], 
+                style=self.style
+            )
+        elif i[0][0] in [i__ for i__ in range(21, 232, 15)]:
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0], 
+                c1=2, 
+                c2=13,
+                label=i[1], 
+                style=self.style
+            )
+        elif i[0][0] in [i__ for i__ in range(23, 246, 15)] \
+                and i[0][1] == 0:
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0] + 11, 
+                c1=0, 
+                c2=0,
+                label=i[1], 
+                style=self.style
+            )
+        elif i[0][0] == 1:
+            self.style.font = font(bold=False)
+            new_sheet.write(*i[0], i[1], style=self.style)
+            self.style.font = font(bold=True)
+        else:
+            new_sheet.write(*i[0], i[1], style=self.style)
+        self.style.font = font(bold=False)
+
+    def run(self):
+        datas = lambda: [
+            self.get_data(xlrd.open_workbook(file).sheet_by_name("Sheet1"))
+            for file in sorted(os.listdir("."))
+            if file.startswith("part") and file.endswith("xlsx")   
+        ]
+        index = 2
+        s = len(datas())
+        c = 1
+        t = time.time()
+        while len(datas()) != 1:
+            _datas = datas()
+            new_file = xlwt.Workbook()
+            new_sheet = new_file.add_sheet("Sheet1")
+            control_list = []
+            for i, j in zip(_datas[0], _datas[1]):
+                if i[0] == j[0]:
+                    if i[1] != "" and j[1] != "":
+                        if isinstance(i[1], float) and \
+                            isinstance(j[1], float):
+                            new_sheet.write(
+                                *i[0], 
+                                i[1] + j[1], 
+                                style=self.style
+                            )
+                        else:
+                            self.special_cells(new_sheet, i)
+                    elif (i[1] != "" and j[1] == "") or \
+                            (i[1] == "" and j[1] != ""):
+                        new_sheet.write(*i[0], i[1], style=self.style)
+                    elif i[1] == "" and j[1] != "":
+                        new_sheet.write(*j[0], j[1], style=self.style)
+                    if i[0] not in control_list:
+                        control_list.append(i[0])
+                    if j[0] not in control_list:
+                        control_list.append(j[0])
+            os.remove(f"part001.xlsx")
+            os.remove(f"part{str(index).zfill(3)}.xlsx")
+            new_file.save(f"part001.xlsx")
+            index += 1
+            c += 1
+            info(s=s, c=c, n=t)
+        else:
+            print()
+            logging.info("Completed merging the separated files.")
+            os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
+            self.master.update()
+            logging.info("Calculation finished.")
+            msgbox.showinfo(message="Calculation finished.")
+            
+
+    def start(self, selected):
+        aspects = {
+            ASPECTS[0]: CONJUNCTION,
+            ASPECTS[1]: SEMI_SEXTILE,
+            ASPECTS[2]: SEMI_SQUARE,
+            ASPECTS[3]: SEXTILE,
+            ASPECTS[4]: QUINTILE,
+            ASPECTS[5]: SQUARE,
+            ASPECTS[6]: TRINE,
+            ASPECTS[7]: SESQUIQUADRATE,
+            ASPECTS[8]: BIQUINTILE,
+            ASPECTS[9]: QUINCUNX,
+            ASPECTS[10]: OPPOSITE,                        
+        }
+        if len(selected) == 2:            
+            file = filedialog.askopenfilename(
+                filetypes=[("CSV File", ".csv")]
+                )
+            files = [i for i in open(file, "r").readlines()]
+            s = len(files)
+            n = time.time()
+            c = 0
+            num = 1
+            logging.info(f"Number of charts: {s}")
+            logging.info(f"Selected: {', '.join(self.selected)}")
+            logging.info(
+                f"Orb Factor: \u00b1 "\
+                f"{aspects[self.selected[0].replace('-', '_')]}\u00b0"
+            )
+            logging.info(f"Mode: {', '.join(self.modes)}")
+            logging.info("Calculation started.")
+            logging.info(f"Separating {len(files)} records into files...")
+            for i in range(len(files)):
+                if i % 400 == 0:
+                    parted = files[i:i + 400]              
+                    part = Spreadsheet()
+                    part.create_tables(
+                            file=parted,
+                            num=num,
+                            selected=[
+                                j.replace("-", "_") for j in self.selected
+                            ],
+                            modes=self.modes
+                    )
+                    num += 1
+                c += 1
+                info(s=s, n=n, c=c)
+            print()
+            logging.info(
+                f"Completed separating {len(files)} records into files."
+            )
+            logging.info(f"Merging the separated files...")
+            self.run()
+        else:
+            msgbox.showinfo(
+                message="Please select one aspect and one planet."
+            )
+               
 
     def select_tables(self, checkbuttons: dict = {}):
         self.selected = []
         for i, j in enumerate(ASPECTS):
+            if "_" in j:
+                j = j.replace("_", "-")
             if j != "null" and checkbuttons[j][1].get() == "1":
                 self.selected.append(j)
         for i in OBJECTS:
             if checkbuttons[i][1].get() == "1":
                 self.selected.append(i)
-        if checkbuttons["All Aspects"][1].get() == "1":
-            self.selected.append("all")
-        self.toplevel_include.destroy()
-        self.toplevel_include = None
-
-    @staticmethod
-    def check_all_buttons(check_all=None, cvar_list: list = [], 
-            checkbutton_list: list = []
-    ):
-        if check_all.get() is True:
-            for var, c_button in zip(cvar_list, checkbutton_list):
-                var.set(True)
-                c_button.configure(variable=var)
+        if len(self.selected) != 2:
+            msgbox.showinfo(
+                message="Please select one aspect and one planet."
+            )
         else:
-            for var, c_button in zip(cvar_list, checkbutton_list):
-                var.set(False)
-                c_button.configure(variable=var)
+            self.toplevel_include.destroy()
+            self.toplevel_include = None
 
     @staticmethod
+    def check_uncheck(
+            checkbuttons: dict = {}, 
+            array: list = [], 
+            j: str = ""
+    ):
+        for i in array:
+            if i != j:
+                checkbuttons[i][1].set("0")
+                checkbuttons[i][0].configure(variable=checkbuttons[i][1])
+
     def checkbutton(
+            self,
             master=None,
             checkbuttons: dict = {},
             text: str = "",
             row: int = 0,
-            column: int = 0
+            column: int = 0,
+            array: list = []
     ):
         var = tk.StringVar()
         var.set(value="0")
@@ -823,6 +934,13 @@ class App(tk.Menu):
         )
         cb.grid(row=row, column=column, sticky="w")
         checkbuttons[text] = [cb, var]
+        checkbuttons[text][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                array,
+                text
+            )
+        )
 
     def include(self):
         self.toplevel_include = tk.Toplevel()
@@ -836,12 +954,6 @@ class App(tk.Menu):
             relief="sunken"
         )
         left_frame.pack(side="left")
-        mid_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
-            relief="sunken"
-        )
-        mid_frame.pack(side="left")
         right_frame = tk.Frame(
             master=main_frame,
             bd=1,
@@ -854,12 +966,6 @@ class App(tk.Menu):
             fg="red"
         )
         left_frame_label.pack()
-        mid_frame_label = tk.Label(
-            master=mid_frame,
-            text="Sum All Aspect Types",
-            fg="red"
-        )
-        mid_frame_label.pack()
         right_frame_label = tk.Label(
             master=right_frame,
             text="Select Planets",
@@ -868,71 +974,33 @@ class App(tk.Menu):
         right_frame_label.pack()
         left_cb_frame = tk.Frame(master=left_frame)
         left_cb_frame.pack()
-        mid_cb_frame = tk.Frame(master=mid_frame)
-        mid_cb_frame.pack()
         right_cb_frame = tk.Frame(master=right_frame)
         right_cb_frame.pack()
         checkbuttons = {}
-        check_all_1 = tk.BooleanVar()
-        check_all_2 = tk.BooleanVar()
-        check_uncheck_1 = tk.Checkbutton(
-            master=left_cb_frame,
-            text="Check/Uncheck All",
-            variable=check_all_1)
-        check_uncheck_2 = tk.Checkbutton(
-            master=right_cb_frame,
-            text="Check/Uncheck All",
-            variable=check_all_2)
-        check_all_1.set(False)
-        check_all_2.set(False)
-        check_uncheck_1.grid(row=0, column=0, sticky="w")
-        check_uncheck_2.grid(row=0, column=0, sticky="w")
         for i, j in enumerate(ASPECTS, 1):
             if j != "null":
                 self.checkbutton(
                     master=left_cb_frame,
-                    text=j,
+                    text=j.replace("_", "-"),
                     row=i,
                     column=0,
-                    checkbuttons=checkbuttons
+                    checkbuttons=checkbuttons,
+                    array=[
+                        asp.replace("_", "-") 
+                        for asp in ASPECTS if asp != "null"
+                    ]
                 )
-        self.checkbutton(
-            master=mid_cb_frame,
-            text="All Aspects",
-            row=0,
-            column=0,
-            checkbuttons=checkbuttons
-        )
         for i, j in enumerate(OBJECTS, 1):
             self.checkbutton(
                 master=right_cb_frame,
                 text=j,
                 row=i,
                 column=0,
-                checkbuttons=checkbuttons
+                checkbuttons=checkbuttons,
+                array=OBJECTS
             )
-        cvar_list_1 = [i[1] for i in checkbuttons.values()][:11]
-        cb_list_1 = [i[0] for i in checkbuttons.values()][:11]
-        cvar_list_2 = [i[1] for i in checkbuttons.values()][12:]
-        cb_list_2 = [i[0] for i in checkbuttons.values()][12:]
-        check_uncheck_1.configure(
-            command=lambda: self.check_all_buttons(
-                check_all_1,
-                cvar_list_1,
-                cb_list_1
-            )
-        )
-        check_uncheck_2.configure(
-            command=lambda: self.check_all_buttons(
-                check_all_2,
-                cvar_list_2,
-                cb_list_2
-            )
-        )
         fill_left = tk.Frame(left_cb_frame, height=92)
         fill_left.grid(row=12, column=0)
-        fill_mid = tk.Frame(master=mid_cb_frame, height=345)
-        fill_mid.grid(row=1, column=0)
         apply_button = tk.Button(
             master=self.toplevel_include,
             text="Apply",
