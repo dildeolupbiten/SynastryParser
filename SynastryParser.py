@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 import os
 import sys
@@ -21,7 +21,7 @@ from datetime import datetime as dt
 
 logging.basicConfig(
     format="- %(levelname)s - %(asctime)s - %(message)s",
-    level=logging.DEBUG,
+    level=logging.INFO,
     datefmt="%d.%m.%Y %H:%M:%S"
 )
 logging.info("Session started.")
@@ -61,6 +61,11 @@ try:
 except ModuleNotFoundError:
     os.system("pip3 install numpy")
     import numpy as np
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    os.system("pip3 install matplotlib")
+    import matplotlib.pyplot as plt
 try:
     import xlwt
 except ModuleNotFoundError:
@@ -660,6 +665,178 @@ class Spreadsheet(xlwt.Workbook):
                 pass
         except TypeError:
             pass
+            
+            
+class Plot:
+
+    @staticmethod
+    def __plt(_x_label="Year", _y_label="People", _title="x / y"):
+        plt.grid(
+            True,
+            color="black",
+            linestyle="-",
+            linewidth=1
+        )
+        plt.xlabel(_x_label)
+        plt.ylabel(_y_label)
+        plt.legend()
+        plt.show()
+        
+    @classmethod
+    def bar(cls, *args):
+        n = 0
+        for i in range(int(len(args) / 2)):
+            plt.bar(
+                args[n],
+                args[n + 1],
+                label="Age Difference"
+            )
+            n += 2
+        cls.__plt()
+        
+    @classmethod
+    def rotating_labels(cls, *args):
+        ax1 = plt.subplot2grid((1, 1), (0, 0))
+        ax1.plot_date(
+            x=args[0],
+            y=args[1],
+            fmt="-",
+            color="blue",
+            label="Male",
+            linewidth=1
+        )
+        ax1.plot_date(
+            x=args[2],
+            y=args[3],
+            fmt="-",
+            color="red",
+            label="Female",
+            linewidth=1
+        )
+        for label in ax1.xaxis.get_ticklabels():
+            label.set_rotation(45)
+        plt.subplots_adjust(
+            left=0.2,
+            bottom=0.2,
+            right=0.9,
+            top=0.9,
+            wspace=0.2,
+            hspace=0
+        )
+        Plot.__plt()
+      
+    
+def frequency(l: list = [], d: dict = {}):
+    for i in l:
+        if i in d.keys():
+            d[i] += 1
+        else:
+            d[i] = 1
+
+
+def year_frequency():
+    url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+    diffs = []
+    data = [
+        [float(j) for j in i.decode().split(",")[1:6]] +
+        [float(i.decode().split(",")[-4])] +
+        [float(i.decode().split(",")[-5]) * -1]
+        for i in urllib.request.urlopen(url)
+    ]
+    male_list = sorted(
+        [
+            dt.strptime(str(int(data[i][0])), "%Y") 
+            for i in range(0, len(data), 2)
+        ]
+    )
+    female_list = sorted(
+        [
+            dt.strptime(str(int(data[i][0])), "%Y") 
+            for i in range(1, len(data), 2)
+        ]
+    )
+    male_dict, female_dict = {}, {}
+    frequency(l=male_list, d=male_dict)
+    frequency(l=female_list, d=female_dict)
+    with open("YearFrequency.txt", "w") as f:
+        f.write(
+            f"|       Male      |      Female     |\n"\
+            f"|  Year  |  Count |  Year  |  Count |\n"\
+        )
+        for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
+            f.write(
+                f"|{i.strftime('%Y').center(8)}|{str(j).center(8)}"\
+                f"|{k.strftime('%Y').center(8)}|{str(m).center(8)}|\n"
+            )
+            f.flush()
+    Plot.rotating_labels(
+        list(male_dict.keys()), 
+        list(male_dict.values()),
+        list(female_dict.keys()),
+        list(female_dict.values())
+    )
+    
+    
+def age_differences_frequency():
+    url = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
+    age_diffs = []
+    age_diff_freq = {i: 0 for i in range(42)}
+    data = [
+        [str(j) for j in i.decode().split(",")[1:6]] +
+        [str(i.decode().split(",")[-4])] +
+        [float(i.decode().split(",")[-5]) * -1]
+        for i in urllib.request.urlopen(url)
+    ]
+    for i in range(len(data)):
+        if data[i][3] == "24":
+            data[i][3] = "0"
+    male_list = [
+        dt.strptime(".".join(data[i][0:3]) + " " + \
+        ":".join(data[i][3:5]), "%Y.%m.%d %H:%M") 
+        for i in range(0, len(data), 2)
+    ]
+    female_list =[
+        dt.strptime(".".join(data[i][0:3]) + " " + \
+        ":".join(data[i][3:5]), "%Y.%m.%d %H:%M") 
+        for i in range(1, len(data), 2)
+    ]
+    f = open("age_diff.txt", "w")
+    f.write(f"|    COUPLES   | AGE DIFFERENCE (YEAR) |\n")
+    count = 0
+    for i in range(len(male_list)):
+        if female_list[i] > male_list[i]:
+            diff = round(
+                (female_list[i] - male_list[i]).total_seconds() /
+                (60 * 60 * 24 * 365.2422), 2
+            )
+        else:
+            diff = round(
+                (male_list[i] - female_list[i]).total_seconds() /
+                (60 * 60 * 24 * 365.2422), 2
+            )
+        f.write(
+            f"| Couple {str(i + 1).center(5)} | {str(diff).center(21)} |\n"
+        )
+        count += diff
+        age_diffs.append(diff)
+        for index, key in enumerate(list(age_diff_freq.keys())):
+            if index != len(list(age_diff_freq.keys())) - 1:
+                if list(age_diff_freq.keys())[index] <= diff < \
+                        list(age_diff_freq.keys())[index + 1]:
+                    age_diff_freq[key] += 1
+    f.write(f"\n\nMean Difference: {count / len(male_list)}\n")
+    f.write(f"Maximum Difference: {max(age_diffs)}\n")
+    f.write(f"Minimum Difference: {min(age_diffs)}\n")
+    f.flush()
+    g = open("age_diff_freq.txt", "w")
+    g.write("| AGE DIFFERENCE (YEAR) | TOTAL |\n")
+    for keys, values in age_diff_freq.items():
+        g.write(f"|{str(keys).center(23)}|{str(values).center(7)}|\n")
+        g.flush()
+    Plot.bar(
+        list(age_diff_freq.keys()), 
+        list(age_diff_freq.values())
+    )
 
 
 class App(tk.Menu):
@@ -672,9 +849,11 @@ class App(tk.Menu):
         self.selected = []
         self.modes = ["Natal", "Natal"]
         self.create = tk.Menu(master=self, tearoff=False)
+        self.frequency = tk.Menu(master=self, tearoff=False)
         self.settings = tk.Menu(master=self, tearoff=False)
         self.help = tk.Menu(master=self, tearoff=False)
         self.add_cascade(label="Create", menu=self.create)
+        self.add_cascade(label="Frequency", menu=self.frequency)
         self.add_cascade(label="Settings", menu=self.settings)
         self.add_cascade(label="Help", menu=self.help)
         self.create.add_command(
@@ -682,6 +861,14 @@ class App(tk.Menu):
             command=lambda: threading.Thread(
                 target=self.create_control_group
             ).start()
+        )
+        self.frequency.add_command(
+            label="Year Frequency",
+            command=year_frequency
+        )
+        self.frequency.add_command(
+            label="Age Difference Frequency",
+            command=age_differences_frequency
         )
         self.settings.add_command(
             label="Include",
