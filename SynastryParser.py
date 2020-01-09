@@ -913,7 +913,7 @@ def long_lati_frequency(
     with open(f"{name}Frequency.txt", "w") as f:
         f.write(
             f"|       Male      |      Female     |\n"
-            f"|  {name[3:]}  |  Count |  {name[3:]}  |  Count |\n"
+            f"|  {name[:4]}  |  Count |  {name[:4]}  |  Count |\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
