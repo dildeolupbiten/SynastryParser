@@ -20,7 +20,7 @@ python3 SynastryParser.py
 
 ## Spreadsheets
 
-When all aspects and **"conjunction"** aspect is selected a table which is similar to below will be created. 
+When the **"Conjunction"** aspect and **"Sun"** check buttons are selected a table which is similar to below will be created. 
 
 ![img1](https://user-images.githubusercontent.com/29302909/72017449-c1f7e580-3276-11ea-88bf-c0f3cc51478a.jpeg)
 
