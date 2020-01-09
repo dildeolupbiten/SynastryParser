@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 import os
 import sys
@@ -886,7 +886,7 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(
             row, column,
             xlwt.Formula(
-                "SUM(C17;D17;E17;F17;G17;H17;I17;J17;K17;L17;M17;N17)"
+                "SUM(C17:N17)"
             ),
             style=self.style)
         self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")
@@ -1500,6 +1500,7 @@ class App(tk.Menu):
         for i in OBJECTS[:-2]:
             if checkbuttons1[i][1].get() == "1":
                 self.selected_obj.append(i)
+        for i in OBJECTS[:-2]:
             if checkbuttons2[i][1].get() == "1":
                 self.selected_obj.append(i)
         if len(self.selected_obj) != 2:
