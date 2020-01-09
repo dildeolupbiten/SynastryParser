@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 import os
 import sys
@@ -311,47 +311,47 @@ def convert_raw_data():
     print()
     
     
-def create_control_group(self):
-        url = URL
-        data = [
-            [int(j) for j in i.decode().split(",")[1:6]][0]
-            for i in urllib.request.urlopen(url)
-        ]
-        males = [data[i] for i in range(0, len(data), 2)]
-        females = [data[i] for i in range(1, len(data), 2)]
-        temp_females = [i for i in females]
-        count = 2
-        now = time.time()
-        try:
-            with open(f"{FILENAME}.csv", "r") as case:
-                logging.info("Creating control group...")
-                case_lines = case.readlines()
-                size = len(case_lines)
-                with open(f"Random_{FILENAME}.csv", "w") \
-                        as control:
-                    for i, male in enumerate(males):
-                        for j, female in enumerate(temp_females):
-                            if females[i] == female and j != 0:
-                                try:
-                                    index = [
-                                        k * 2 + 1 for k in range(len(females)) 
-                                        if females[k] == female
-                                    ][1]
-                                    control.write(f"{case_lines[count]}")
-                                    control.write(f"{case_lines[index]}")
-                                    control.flush()
-                                except IndexError:
-                                    pass
-                                temp_females.pop(j)
-                                count += 2
-                                info(s=size, c=count, n=now)
-                                break
-                file = f"Random_{FILENAME}.csv"
-                length = len([i for i in open(file, "r")])
-                os.rename(file, file.replace("41832", f"{length}"))
-                logging.info("Completed creating control group.")
-        except FileNotFoundError:
-            logging.info(f"{FILENAME}.csv is not found.")
+def create_control_group():
+    url = URL
+    data = [
+        [int(j) for j in i.decode().split(",")[1:6]][0]
+        for i in urllib.request.urlopen(url)
+    ]
+    males = [data[i] for i in range(0, len(data), 2)]
+    females = [data[i] for i in range(1, len(data), 2)]
+    temp_females = [i for i in females]
+    count = 2
+    now = time.time()
+    try:
+        with open(f"{FILENAME}.csv", "r") as case:
+            logging.info("Creating control group...")
+            case_lines = case.readlines()
+            size = len(case_lines)
+            with open(f"Random_{FILENAME}.csv", "w") \
+                    as control:
+                for i, male in enumerate(males):
+                    for j, female in enumerate(temp_females):
+                        if females[i] == female and j != 0:
+                            try:
+                                index = [
+                                    k * 2 + 1 for k in range(len(females))
+                                    if females[k] == female
+                                ][1]
+                                control.write(f"{case_lines[count]}")
+                                control.write(f"{case_lines[index]}")
+                                control.flush()
+                            except IndexError:
+                                pass
+                            temp_females.pop(j)
+                            count += 2
+                            info(s=size, c=count, n=now)
+                            break
+            file = f"Random_{FILENAME}.csv"
+            length = len([i for i in open(file, "r")])
+            os.rename(file, file.replace("41832", f"{length}"))
+            logging.info("Completed creating control group.")
+    except FileNotFoundError:
+        logging.info(f"{FILENAME}.csv is not found.")
     
 
 class Chart:
@@ -499,7 +499,8 @@ def search_aspect(x_: int = 0, y_: int = 0, orb: int = 0, aspect: int = 0):
             return 0
 
 
-def create_table(_x: int = [], _y: int = [], obj: str = "", 
+def create_table(
+        _x: list = [], _y: list = [], obj: str = "",
         aspect: int = 0, orb: int = 0
 ):
     result = []
@@ -521,32 +522,33 @@ def create_table(_x: int = [], _y: int = [], obj: str = "",
     return result
 
 
-def change_mode(info: list = [], mode: dict = {}):
-    for i, j in enumerate(info):
-        info[i] = [info[i][0]] + \
-                  [mode[info[i][1]]] + \
+def change_mode(_info: list = [], mode: dict = {}):
+    for i, j in enumerate(_info):
+        _info[i] = [_info[i][0]] + \
+                  [mode[_info[i][1]]] + \
                   [
-                      SST[mode[info[i][1]]] +
-                      30 - info[i][2] % 30
+                      SST[mode[_info[i][1]]] +
+                      30 - _info[i][2] % 30
                   ]
-    return info
+    return _info
 
 
-def change_values(selection: str= "", info: list = []):
+def change_values(selection: str = "", _info: list = []):
     if selection == "Antiscia":
-        info = change_mode(info=info, mode=ANTISCIA)
+        _info = change_mode(_info=_info, mode=ANTISCIA)
     elif selection == "Contra-Antiscia":
-        info = change_mode(info=info, mode=CONTRA_ANTISCIA)
-    return info
+        _info = change_mode(_info=_info, mode=CONTRA_ANTISCIA)
+    return _info
 
 
-def activate_selections(selected: list = [], modes: list = [], 
+def activate_selections(
+        selected: list = [], modes: list = [],
         male: list = [], female: list = []
 ):
     global x, y
     x, y = male, female
-    x = change_values(selection=modes[0], info=x)
-    y = change_values(selection=modes[1], info=y)
+    x = change_values(selection=modes[0], _info=x)
+    y = change_values(selection=modes[1], _info=y)
     aspect_commands = {
         ASPECTS[0]: "parse_aspects("
                     "find_aspect(x, y), 0, CONJUNCTION)",
@@ -724,7 +726,8 @@ class Spreadsheet(xlwt.Workbook):
             row += 1
         self.size += len(table.keys()) + 3  
         
-    def create_tables(self, file: list = [], selected: list = [], 
+    def create_tables(
+            self, file: list = [], selected: list = [],
             modes: list = [], num: int = 0
     ):
         read = read_files(file, selected, modes)
@@ -886,7 +889,6 @@ def long_lati_frequency(
         index: int = 0
 ):
     url = URL
-    diffs = []
     data = [
         [float(j) for j in i.decode().split(",")[1:6]] +
         [float(i.decode().split(",")[-4])] +
@@ -910,12 +912,12 @@ def long_lati_frequency(
     frequency(l=female_list, d=female_dict)
     with open(f"{name}Frequency.txt", "w") as f:
         f.write(
-            f"|       Male      |      Female     |\n"\
-            f"|  {name[3]}  |  Count |  {name[3]}  |  Count |\n"\
+            f"|       Male      |      Female     |\n"
+            f"|  {name[3:]}  |  Count |  {name[3:]}  |  Count |\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
-                f"|{str(i).center(8)}|{str(j).center(8)}"\
+                f"|{str(i).center(8)}|{str(j).center(8)}"
                 f"|{str(k).center(8)}|{str(m).center(8)}|\n"
             )
             f.flush()
@@ -930,7 +932,6 @@ def long_lati_frequency(
 
 def year_frequency():
     url = URL
-    diffs = []
     data = [
         [float(j) for j in i.decode().split(",")[1:6]] +
         [float(i.decode().split(",")[-4])] +
@@ -954,12 +955,12 @@ def year_frequency():
     frequency(l=female_list, d=female_dict)
     with open("YearFrequency.txt", "w") as f:
         f.write(
-            f"|       Male      |      Female     |\n"\
-            f"|  Year  |  Count |  Year  |  Count |\n"\
+            f"|       Male      |      Female     |\n"
+            f"|  Year  |  Count |  Year  |  Count |\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
-                f"|{i.strftime('%Y').center(8)}|{str(j).center(8)}"\
+                f"|{i.strftime('%Y').center(8)}|{str(j).center(8)}"
                 f"|{k.strftime('%Y').center(8)}|{str(m).center(8)}|\n"
             )
             f.flush()
@@ -985,13 +986,19 @@ def age_differences_frequency():
         if data[i][3] == "24":
             data[i][3] = "0"
     male_list = [
-        dt.strptime(".".join(data[i][0:3]) + " " + \
-        ":".join(data[i][3:5]), "%Y.%m.%d %H:%M") 
+        dt.strptime(
+            ".".join(data[i][0:3]) + " " +
+            ":".join(data[i][3:5]),
+            "%Y.%m.%d %H:%M"
+        )
         for i in range(0, len(data), 2)
     ]
-    female_list =[
-        dt.strptime(".".join(data[i][0:3]) + " " + \
-        ":".join(data[i][3:5]), "%Y.%m.%d %H:%M") 
+    female_list = [
+        dt.strptime(
+            ".".join(data[i][0:3]) + " " +
+            ":".join(data[i][3:5]),
+            "%Y.%m.%d %H:%M"
+        )
         for i in range(1, len(data), 2)
     ]
     f = open("age_diff.txt", "w")
@@ -1134,8 +1141,7 @@ class App(tk.Menu):
             for col in range(sheet.ncols):
                 data.append(([row, col], sheet.cell_value(row, col)))
         return data
-    
-    
+
     def special_cells(self, new_sheet, i):
         self.style.font = font(bold=True)
         if "Orb" in i[1]:      
@@ -1206,7 +1212,7 @@ class App(tk.Menu):
                 if i[0] == j[0]:
                     if i[1] != "" and j[1] != "":
                         if isinstance(i[1], float) and \
-                            isinstance(j[1], float):
+                                isinstance(j[1], float):
                             new_sheet.write(
                                 *i[0], 
                                 i[1] + j[1], 
@@ -1236,7 +1242,6 @@ class App(tk.Menu):
             self.master.update()
             logging.info("Calculation finished.")
             msgbox.showinfo(message="Calculation finished.")
-            
 
     def start(self, selected):
         aspects = {
@@ -1265,8 +1270,8 @@ class App(tk.Menu):
                 logging.info(f"Number of records: {s}")
                 logging.info(f"Selected: {', '.join(self.selected)}")
                 logging.info(
-                    f"Orb Factor: \u00b1 "\
-                    f"{aspects[self.selected[0].replace('-', '_')]}"\
+                    f"Orb Factor: \u00b1 "
+                    f"{aspects[self.selected[0].replace('-', '_')]}"
                     f"\u00b0"
                 )
                 logging.info(f"Mode: {', '.join(self.modes)}")
@@ -1302,7 +1307,6 @@ class App(tk.Menu):
             msgbox.showinfo(
                 message="Please select one aspect and one planet."
             )
-              
 
     def select_tables(self, checkbuttons: dict = {}):
         self.selected = []
@@ -1531,10 +1535,10 @@ class App(tk.Menu):
                 "SynastryParser/master/SynastryParser.py"
         url_2 = "https://raw.githubusercontent.com/dildeolupbiten/" \
                 "SynastryParser/master/README.md"
-        data_1 = urllib.urlopen(
+        data_1 = urllib.request.urlopen(
             url=url_1,
             context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
-        data_2 = urllib.urlopen(
+        data_2 = urllib.request.urlopen(
             url=url_2,
             context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
         with open(
