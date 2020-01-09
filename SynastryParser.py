@@ -1366,8 +1366,8 @@ class App(tk.Menu):
         else:
             print(len(selected_obj))
             msgbox.showinfo(
-                message="Please 'Basic' or 'Detailed' calculations "
-                    "from settings menu."
+                message="Please select 'Basic' or 'Detailed' calculations "
+                    "from 'Settings' menu."
             )
 
     def select_tables(self, checkbuttons: dict = {}):
