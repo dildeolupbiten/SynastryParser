@@ -28,6 +28,10 @@ When the **"Sun"** and **"Sun"** check buttons are selected from **"Basic** menu
 
 ![img2](https://user-images.githubusercontent.com/29302909/72083581-1baded80-3313-11ea-950e-b0c73c885407.jpeg)
 
+When the **"Sun"** and **"Moon"** check buttons are selected from **"Basic** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
+
+![img3](https://user-images.githubusercontent.com/29302909/72084176-156c4100-3314-11ea-993a-d0aedc87f515.jpeg)
+
 ## Notes
 
 **1.** The tables may not be opened by Microsoft Excel. Therefore it is recommended to use [Libre Office](https://www.libreoffice.org/download/download/). 
