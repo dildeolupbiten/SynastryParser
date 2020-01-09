@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.9"
+__version__ = "1.1.0"
 
 import os
 import sys
@@ -207,6 +207,10 @@ SST = {
     SIGNS[i]: 30 * i
     for i in range(len(SIGNS))
 }
+TABLE = {
+    i: {j: 0 for j in SIGNS}
+    for i in SIGNS
+}
 
 
 def info(s, c, n):
@@ -355,7 +359,7 @@ def create_control_group():
     
 
 class Chart:
-    __PLANET_DICT = {
+    PLANET_DICT = {
         "Sun": swe.SUN,
         "Moon": swe.MOON,
         "Mercury": swe.MERCURY,
@@ -417,7 +421,7 @@ class Chart:
         count = 0
         planet_positions = []
         house_positions = []
-        for key, value in self.__PLANET_DICT.items():
+        for key, value in self.PLANET_DICT.items():
             planet = self.planet_pos(planet=value)
             planet_info = [
                 key,
@@ -651,6 +655,26 @@ def read_files(file: list = [], selected: list = [], modes: list = []):
     item1 = file_list[0]   
     return count_aspects_1(item1, file_list, 1), \
         count_aspects_2(split_list, selected)
+        
+        
+def read_file(file: str = "", arg1: str = "", arg2: str = ""):
+    keys = list(Chart.PLANET_DICT.keys())
+    with open(file, "r") as f:
+        readlines = f.readlines()
+        size = len(readlines)
+        now = time.time()
+        count = 0
+        for i in range(0, size, 2):
+            male = Chart(
+                *[float(col) for col in readlines[i][:-1].split(",")], "P"
+            ).patterns()[keys.index(arg1)][1]
+            female = Chart(
+                *[float(col) for col in readlines[i + 1][:-1].split(",")], "P"
+            ).patterns()[keys.index(arg2)][1]
+            TABLE[male][female] += 1
+            count += 2
+            info(s=size, c=count, n=now)
+        print()
             
             
 def font(name: str = "Arial", bold: bool = False):
@@ -664,8 +688,10 @@ class Spreadsheet(xlwt.Workbook):
     size = 3
     obj = None
 
-    def __init__(self):
+    def __init__(self, arg1: str = "" , arg2: str = ""):
         xlwt.Workbook.__init__(self)
+        self.arg1 = arg1
+        self.arg2 = arg2
         self.sheet = self.add_sheet("Sheet1")
         self.style = xlwt.XFStyle()
         self.alignment = xlwt.Alignment()
@@ -802,6 +828,68 @@ class Spreadsheet(xlwt.Workbook):
                 pass
         except TypeError:
             pass
+            
+    def write_basic(self, modes: list = [], selected_obj: list = []):
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
+        )
+        self.sheet.write(r=0, c=1, label="1. Person", style=self.style)
+        self.sheet.write(r=0, c=2, label="2. Person", style=self.style)
+        self.style.font = font(bold=False)
+        self.sheet.write(r=1, c=1, label=modes[0], style=self.style)
+        self.sheet.write(r=1, c=2, label=modes[1], style=self.style)
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=2, c1=2, r2=2, c2=13, label=selected_obj[0], style=self.style
+        )
+        self.sheet.write_merge(
+            r1=4, c1=0, r2=15, c2=0, label=selected_obj[1], style=self.style
+        )
+        for i, i_ in enumerate(SIGNS):
+            self.sheet.write(r=3, c=i + 2, label=i_, style=self.style)
+            self.sheet.write(r=i + 4, c=1, label=i_, style=self.style)
+        self.sheet.write(r=3, c=14, label="Total", style=self.style)
+        self.sheet.write(r=16, c=1, label="Total", style=self.style)
+        self.style.font = font(bold=False)
+        row = 4
+        for keys, values in TABLE.items():
+            column = 2
+            for subkeys, subvalues in values.items():
+                self.sheet.write(
+                    r=row, 
+                    c=column, 
+                    label=subvalues, 
+                    style=self.style
+                )
+                column += 1
+            row_t = sum([i for i in values.values()])
+            self.sheet.write(
+                r=row, 
+                c=column, 
+                label=row_t, 
+                style=self.style
+            )
+            row += 1
+        column = 2
+        for keys, values in TABLE.items():
+            col_t = 0           
+            for k, v in TABLE.items():
+                col_t += v[keys]
+            self.sheet.write(
+                r=row, 
+                c=column, 
+                label=col_t, 
+                style=self.style
+            )
+            column += 1
+        self.sheet.write(
+            row, column,
+            xlwt.Formula(
+                "SUM(C17;D17;E17;F17;G17;H17;I17;J17;K17;L17;M17;N17)"
+            ),
+            style=self.style)
+        self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")
             
             
 class Plot:
@@ -973,9 +1061,11 @@ class App(tk.Menu):
     def __init__(self, master=None):
         tk.Menu.__init__(self, master)
         self.master.configure(menu=self)
-        self.toplevel_include = None
+        self.toplevel_detailed = None
+        self.toplevel_basic = None
         self.toplevel_mode = None
         self.selected = []
+        self.selected_obj = []
         self.modes = ["Natal", "Natal"]
         self.convert = tk.Menu(master=self, tearoff=False)
         self.create = tk.Menu(master=self, tearoff=False)
@@ -1022,10 +1112,17 @@ class App(tk.Menu):
             command=age_differences_frequency
         )
         self.settings.add_command(
-            label="Include",
+            label="Basic",
             command=lambda: self.open_toplevel(
-                toplevel=self.toplevel_include,
-                func=self.include
+                toplevel=self.toplevel_basic,
+                func=self.basic
+            )
+        )
+        self.settings.add_command(
+            label="Detailed",
+            command=lambda: self.open_toplevel(
+                toplevel=self.toplevel_detailed,
+                func=self.detailed
             )
         )
         self.settings.add_command(
@@ -1058,7 +1155,7 @@ class App(tk.Menu):
             text="Start",
             command=lambda: threading.Thread(
                 target=self.start,
-                args=(self.selected, )
+                args=(self.selected, self.selected_obj)
             ).start()
         )
         self.style = xlwt.XFStyle()
@@ -1174,10 +1271,11 @@ class App(tk.Menu):
             logging.info("Completed merging the separated files.")
             os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
             self.master.update()
-            logging.info("Calculation finished.")
-            msgbox.showinfo(message="Calculation finished.")
+            logging.info("Detailed calculation finished.")
+            msgbox.showinfo(message="Detailed calculation finished.")
 
-    def start(self, selected):
+    def start(self, selected: list = [], selected_obj: list = []):
+        global TABLE
         aspects = {
             ASPECTS[0]: CONJUNCTION,
             ASPECTS[1]: SEMI_SEXTILE,
@@ -1191,7 +1289,7 @@ class App(tk.Menu):
             ASPECTS[9]: QUINCUNX,
             ASPECTS[10]: OPPOSITE,                        
         }
-        if len(selected) == 2:
+        if len(selected) == 2 and len(selected_obj) == 0:
             try:            
                 file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -1209,7 +1307,7 @@ class App(tk.Menu):
                     f"\u00b0"
                 )
                 logging.info(f"Mode: {', '.join(self.modes)}")
-                logging.info("Calculation started.")
+                logging.info("Detailed calculation started.")
                 logging.info(
                     f"Separating {len(files)} records into files..."
                 )
@@ -1222,7 +1320,7 @@ class App(tk.Menu):
                                 num=num,
                                 selected=[
                                     j.replace("-", "_") 
-                                    for j in self.selected
+                                    for j in selected
                                 ],
                                 modes=self.modes
                         )
@@ -1237,9 +1335,39 @@ class App(tk.Menu):
                 self.run()
             except:
                 pass
+        elif len(selected) == 0 and len(selected_obj) == 2:
+            ask_file = filedialog.askopenfilename(
+                filetypes=[("CSV File", ".csv")]
+            )
+            s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"Number of records: {s}")
+            logging.info(
+                f"Selected Objects: {', '.join(selected_obj)}"
+            )
+            logging.info(f"Mode: {', '.join(self.modes)}")
+            logging.info("Basic calculation started.")
+            read_file(
+                file=ask_file, 
+                arg1=selected_obj[0], 
+                arg2=selected_obj[1]
+            )     
+            Spreadsheet(
+                    arg1=selected_obj[0], arg2=selected_obj[1]
+             ).write_basic(
+                modes=self.modes,
+                selected_obj=selected_obj
+             )
+            logging.info("Basic calculation finished.")
+            msgbox.showinfo(message="Basic calculation finished.")
+            TABLE = {
+                i: {j: 0 for j in SIGNS}
+                for i in SIGNS
+            }
         else:
+            print(len(selected_obj))
             msgbox.showinfo(
-                message="Please select one aspect and one planet."
+                message="Please 'Basic' or 'Detailed' calculations "
+                    "from settings menu."
             )
 
     def select_tables(self, checkbuttons: dict = {}):
@@ -1257,8 +1385,9 @@ class App(tk.Menu):
                 message="Please select one aspect and one planet."
             )
         else:
-            self.toplevel_include.destroy()
-            self.toplevel_include = None
+            self.toplevel_detailed.destroy()
+            self.toplevel_detailed = None
+            self.selected_obj = []
 
     @staticmethod
     def check_uncheck(
@@ -1297,11 +1426,11 @@ class App(tk.Menu):
             )
         )
 
-    def include(self):
-        self.toplevel_include = tk.Toplevel()
-        self.toplevel_include.title("Include")
-        self.toplevel_include.resizable(width=False, height=False)
-        main_frame = tk.Frame(master=self.toplevel_include)
+    def detailed(self):
+        self.toplevel_detailed = tk.Toplevel()
+        self.toplevel_detailed.title("Detailed")
+        self.toplevel_detailed.resizable(width=False, height=False)
+        main_frame = tk.Frame(master=self.toplevel_detailed)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
@@ -1357,9 +1486,90 @@ class App(tk.Menu):
         fill_left = tk.Frame(left_cb_frame, height=92)
         fill_left.grid(row=12, column=0)
         apply_button = tk.Button(
-            master=self.toplevel_include,
+            master=self.toplevel_detailed,
             text="Apply",
             command=lambda: self.select_tables(checkbuttons)
+        )
+        apply_button.pack(side="bottom")
+        
+    def select_objects(
+            self, 
+            checkbuttons1: dict = {}, 
+            checkbuttons2: dict = {}
+    ):
+        self.selected_obj = []
+        for i in OBJECTS[:-2]:
+            if checkbuttons1[i][1].get() == "1":
+                self.selected_obj.append(i)
+            if checkbuttons2[i][1].get() == "1":
+                self.selected_obj.append(i)
+        if len(self.selected_obj) != 2:
+            msgbox.showinfo(
+                message="Please select at least two objects."
+            )
+        else:
+            self.toplevel_basic.destroy()
+            self.toplevel_basic = None
+            self.selected = []
+        
+    def basic(self):
+        self.toplevel_basic = tk.Toplevel()
+        self.toplevel_basic.title("Basic")
+        self.toplevel_basic.geometry("250x400")
+        self.toplevel_basic.resizable(width=False, height=False)
+        main_frame = tk.Frame(master=self.toplevel_basic)
+        main_frame.pack()
+        left_frame = tk.Frame(
+            master=main_frame, 
+            bd=1, 
+            relief="sunken"
+        )
+        left_frame.pack(side="left")
+        label_left = tk.Label(
+            master=left_frame,
+            text="Select A Planet\nfor 1'st person",
+            fg="red"
+        )
+        label_left.pack()
+        left_bottom = tk.Frame(master=left_frame)
+        left_bottom.pack()
+        right_frame = tk.Frame(
+            master=main_frame,
+            bd=1,
+            relief="sunken"
+        )
+        right_frame.pack(side="left")
+        label_right = tk.Label(
+            master=right_frame,
+            text="Select A Planet\nfor 2'nd person",
+            fg="red"
+        )
+        label_right.pack()
+        right_bottom = tk.Frame(master=right_frame)
+        right_bottom.pack()
+        checkbuttons1 = {}
+        checkbuttons2 = {}
+        for i, j in enumerate(OBJECTS[:-2], 1):
+            self.checkbutton(
+                master=left_bottom,
+                text=j,
+                row=i,
+                column=0,
+                checkbuttons=checkbuttons1,
+                array=OBJECTS[:-2]
+            )
+            self.checkbutton(
+                master=right_bottom,
+                text=j,
+                row=i,
+                column=0,
+                checkbuttons=checkbuttons2,
+                array=OBJECTS[:-2]
+            )
+        apply_button = tk.Button(
+            master=self.toplevel_basic,
+            text="Apply",
+            command=lambda: self.select_objects(checkbuttons1, checkbuttons2)
         )
         apply_button.pack(side="bottom")
 
