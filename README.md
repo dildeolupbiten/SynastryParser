@@ -20,11 +20,11 @@ python3 SynastryParser.py
 
 ## Spreadsheets
 
-When the **"Conjunction"** and **"Sun"** check buttons are selected from **"Detailed** menu button which is under the **"Settings"**, a table similar to below will be created. 
+When the **"Conjunction"** and **"Sun"** check buttons are selected from **"Detailed** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
 
 ![img1](https://user-images.githubusercontent.com/29302909/72017449-c1f7e580-3276-11ea-88bf-c0f3cc51478a.jpeg)
 
-When the **"Sun"** and **"Sun"** check buttons are selected from **"Basic** menu button which is under the **"Settings"**, a table similar to below will be created. 
+When the **"Sun"** and **"Sun"** check buttons are selected from **"Basic** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
 
 ![img2](https://user-images.githubusercontent.com/29302909/72083581-1baded80-3313-11ea-950e-b0c73c885407.jpeg)
 
