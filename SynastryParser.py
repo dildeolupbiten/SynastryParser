@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.8"
+__version__ = "1.0.9"
 
 import os
 import sys
@@ -839,41 +839,10 @@ class Plot:
             plt.bar(
                 args[n],
                 args[n + 1],
-                label="Age Difference"
+                label="Couple"
             )
             n += 2
-        cls.__plt(_x_label="Year Difference", _y_label="Number of couple")
-        
-    @classmethod
-    def rotating_labels(cls, *args):
-        ax1 = plt.subplot2grid((1, 1), (0, 0))
-        ax1.plot_date(
-            x=args[0],
-            y=args[1],
-            fmt="-",
-            color="blue",
-            label="Male",
-            linewidth=1
-        )
-        ax1.plot_date(
-            x=args[2],
-            y=args[3],
-            fmt="-",
-            color="red",
-            label="Female",
-            linewidth=1
-        )
-        for label in ax1.xaxis.get_ticklabels():
-            label.set_rotation(45)
-        plt.subplots_adjust(
-            left=0.2,
-            bottom=0.2,
-            right=0.9,
-            top=0.9,
-            wspace=0.2,
-            hspace=0
-        )
-        cls.__plt(_x_label="Year", _y_label="Number of people")
+        cls.__plt(_x_label="Age Difference", _y_label="Number of couple")
       
     
 def frequency(l: list = [], d: dict = {}):
@@ -884,7 +853,7 @@ def frequency(l: list = [], d: dict = {}):
             d[i] = 1
             
             
-def long_lati_frequency(
+def year_long_lati_frequency(
         name: str = "",
         index: int = 0
 ):
@@ -913,8 +882,8 @@ def long_lati_frequency(
     with open(f"{name}Frequency.txt", "w") as f:
         f.write(
             f"|{'Male'.center(29)}|{'Female'.center(29)}|\n"
-            f"|{name[:3].center(14)}|{'Count'.center(14)}|"
-            f"{name[:3].center(14)}|{'Count'.center(14)}|\n"
+            f"|{name[:4].center(13)}|{'Count'.center(14)}|"
+            f"{name[:4].center(13)}|{'Count'.center(14)}|\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
@@ -928,48 +897,6 @@ def long_lati_frequency(
         list(female_dict.keys()),
         list(female_dict.values()),
         name
-    )
-
-
-def year_frequency():
-    url = URL
-    data = [
-        [float(j) for j in i.decode().split(",")[1:6]] +
-        [float(i.decode().split(",")[-4])] +
-        [float(i.decode().split(",")[-5]) * -1]
-        for i in urllib.request.urlopen(url)
-    ]
-    male_list = sorted(
-        [
-            dt.strptime(str(int(data[i][0])), "%Y") 
-            for i in range(0, len(data), 2)
-        ]
-    )
-    female_list = sorted(
-        [
-            dt.strptime(str(int(data[i][0])), "%Y") 
-            for i in range(1, len(data), 2)
-        ]
-    )
-    male_dict, female_dict = {}, {}
-    frequency(l=male_list, d=male_dict)
-    frequency(l=female_list, d=female_dict)
-    with open("YearFrequency.txt", "w") as f:
-        f.write(
-            f"|       Male      |      Female     |\n"
-            f"|  Year  |  Count |  Year  |  Count |\n"
-        )
-        for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
-            f.write(
-                f"|{i.strftime('%Y').center(8)}|{str(j).center(8)}"
-                f"|{k.strftime('%Y').center(8)}|{str(m).center(8)}|\n"
-            )
-            f.flush()
-    Plot.rotating_labels(
-        list(male_dict.keys()), 
-        list(male_dict.values()),
-        list(female_dict.keys()),
-        list(female_dict.values())
     )
     
     
@@ -1074,15 +1001,21 @@ class App(tk.Menu):
         )
         self.frequency.add_command(
             label="Longitude Frequency",
-            command=lambda: long_lati_frequency(name="Longitude", index=-1)
+            command=lambda: year_long_lati_frequency(
+                name="Longitude", index=-1
+            )
         )
         self.frequency.add_command(
             label="Latitude Frequency",
-            command=lambda: long_lati_frequency(name="Latitude", index=-2)
+            command=lambda: year_long_lati_frequency(
+                name="Latitude", index=-2
+            )
         )
         self.frequency.add_command(
             label="Year Frequency",
-            command=year_frequency
+            command=lambda: year_long_lati_frequency(
+                name="Year", index=0
+            )
         )
         self.frequency.add_command(
             label="Age Difference Frequency",
