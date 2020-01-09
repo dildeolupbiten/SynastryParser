@@ -1527,7 +1527,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select A Planet\nfor 1'st person",
+            text="Select a planet\nfor 1'st person",
             fg="red"
         )
         label_left.pack()
@@ -1541,7 +1541,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select A Planet\nfor 2'nd person",
+            text="Select a planet\nfor 2'nd person",
             fg="red"
         )
         label_right.pack()
