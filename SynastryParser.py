@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.7"
+__version__ = "1.0.8"
 
 import os
 import sys
@@ -912,13 +912,14 @@ def long_lati_frequency(
     frequency(l=female_list, d=female_dict)
     with open(f"{name}Frequency.txt", "w") as f:
         f.write(
-            f"|       Male      |      Female     |\n"
-            f"|  {name[:4]}  |  Count |  {name[:4]}  |  Count |\n"
+            f"|{'Male'.center(29)}|{'Female'.center(29)}|\n"
+            f"|{name[:3].center(14)}|{'Count'.center(14)}|"
+            f"{name[:3].center(14)}|{'Count'.center(14)}|\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
-                f"|{str(i).center(8)}|{str(j).center(8)}"
-                f"|{str(k).center(8)}|{str(m).center(8)}|\n"
+                f"|{str(i).center(14)}|{str(j).center(14)}"
+                f"|{str(k).center(14)}|{str(m).center(14)}|\n"
             )
             f.flush()
     Plot.plot(
