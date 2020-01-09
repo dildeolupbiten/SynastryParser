@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
 import os
 import sys
@@ -804,7 +804,7 @@ class Spreadsheet(xlwt.Workbook):
 class Plot:
 
     @staticmethod
-    def __plt(_x_label="Year", _y_label="", _title="x / y"):
+    def __plt(_x_label="", _y_label="", _title="x / y"):
         plt.grid(
             True,
             color="black",
@@ -817,16 +817,29 @@ class Plot:
         plt.show()
         
     @classmethod
+    def plot(cls, *args):
+        n = 0
+        for i, j in zip(["Male", "Female"], ["blue", "red"]):
+            plt.plot(
+                args[n],
+                args[n + 1],
+                label=i,
+                color=j
+            )
+            n += 2
+        cls.__plt(_x_label=args[-1], _y_label="Number of people")
+        
+    @classmethod
     def bar(cls, *args):
         n = 0
-        for i in range(int(len(args) / 2)):
+        for i in range(len(args) // 2):
             plt.bar(
                 args[n],
                 args[n + 1],
                 label="Age Difference"
             )
             n += 2
-        cls.__plt(_y_label="Number of couple")
+        cls.__plt(_x_label="Year Difference", _y_label="Number of couple")
         
     @classmethod
     def rotating_labels(cls, *args):
@@ -857,7 +870,7 @@ class Plot:
             wspace=0.2,
             hspace=0
         )
-        Plot.__plt(_y_label="Number of people")
+        cls.__plt(_x_label="Year", _y_label="Number of people")
       
     
 def frequency(l: list = [], d: dict = {}):
@@ -866,6 +879,53 @@ def frequency(l: list = [], d: dict = {}):
             d[i] += 1
         else:
             d[i] = 1
+            
+            
+def long_lati_frequency(
+        name: str = "",
+        index: int = 0
+):
+    url = URL
+    diffs = []
+    data = [
+        [float(j) for j in i.decode().split(",")[1:6]] +
+        [float(i.decode().split(",")[-4])] +
+        [float(i.decode().split(",")[-5]) * -1]
+        for i in urllib.request.urlopen(url)
+    ]
+    male_list = sorted(
+        [
+            data[i][index]
+            for i in range(0, len(data), 2)
+        ]
+    )
+    female_list = sorted(
+        [
+            data[i][index]
+            for i in range(1, len(data), 2)
+        ]
+    )
+    male_dict, female_dict = {}, {}
+    frequency(l=male_list, d=male_dict)
+    frequency(l=female_list, d=female_dict)
+    with open(f"{name}Frequency.txt", "w") as f:
+        f.write(
+            f"|       Male      |      Female     |\n"\
+            f"|  {name[3]}  |  Count |  {name[3]}  |  Count |\n"\
+        )
+        for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
+            f.write(
+                f"|{str(i).center(8)}|{str(j).center(8)}"\
+                f"|{str(k).center(8)}|{str(m).center(8)}|\n"
+            )
+            f.flush()
+    Plot.plot(
+        list(male_dict.keys()), 
+        list(male_dict.values()),
+        list(female_dict.keys()),
+        list(female_dict.values()),
+        name
+    )
 
 
 def year_frequency():
@@ -1003,6 +1063,14 @@ class App(tk.Menu):
             command=lambda: threading.Thread(
                 target=create_control_group
             ).start()
+        )
+        self.frequency.add_command(
+            label="Longitude Frequency",
+            command=lambda: long_lati_frequency(name="Longitude", index=-1)
+        )
+        self.frequency.add_command(
+            label="Latitude Frequency",
+            command=lambda: long_lati_frequency(name="Latitude", index=-2)
         )
         self.frequency.add_command(
             label="Year Frequency",
