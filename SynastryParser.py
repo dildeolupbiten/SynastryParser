@@ -1364,7 +1364,6 @@ class App(tk.Menu):
                 for i in SIGNS
             }
         else:
-            print(len(selected_obj))
             msgbox.showinfo(
                 message="Please select 'Basic' or 'Detailed' calculations "
                     "from 'Settings' menu."
