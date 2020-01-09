@@ -882,8 +882,8 @@ def year_long_lati_frequency(
     with open(f"{name}Frequency.txt", "w") as f:
         f.write(
             f"|{'Male'.center(29)}|{'Female'.center(29)}|\n"
-            f"|{name[:4].center(13)}|{'Count'.center(14)}|"
-            f"{name[:4].center(13)}|{'Count'.center(14)}|\n"
+            f"|{name[:4].center(14)}|{'Count'.center(14)}|"
+            f"{name[:4].center(14)}|{'Count'.center(14)}|\n"
         )
         for (i, j), (k, m) in zip(male_dict.items(), female_dict.items()):
             f.write(
