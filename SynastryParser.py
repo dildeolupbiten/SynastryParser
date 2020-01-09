@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 import os
 import sys
@@ -841,18 +841,18 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=1, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=2, c1=2, r2=2, c2=13, label=selected_obj[0], style=self.style
+            r1=3, c1=2, r2=3, c2=13, label=selected_obj[0], style=self.style
         )
         self.sheet.write_merge(
-            r1=4, c1=0, r2=15, c2=0, label=selected_obj[1], style=self.style
+            r1=5, c1=0, r2=16, c2=0, label=selected_obj[1], style=self.style
         )
         for i, i_ in enumerate(SIGNS):
-            self.sheet.write(r=3, c=i + 2, label=i_, style=self.style)
-            self.sheet.write(r=i + 4, c=1, label=i_, style=self.style)
-        self.sheet.write(r=3, c=14, label="Total", style=self.style)
-        self.sheet.write(r=16, c=1, label="Total", style=self.style)
+            self.sheet.write(r=4, c=i + 2, label=i_, style=self.style)
+            self.sheet.write(r=i + 5, c=1, label=i_, style=self.style)
+        self.sheet.write(r=4, c=14, label="Total", style=self.style)
+        self.sheet.write(r=17, c=1, label="Total", style=self.style)
         self.style.font = font(bold=False)
-        row = 4
+        row = 5
         for keys, values in TABLE.items():
             column = 2
             for subkeys, subvalues in values.items():
@@ -886,7 +886,7 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(
             row, column,
             xlwt.Formula(
-                "SUM(C17:N17)"
+                "SUM(C18:N18)"
             ),
             style=self.style)
         self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")
