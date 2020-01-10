@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 import os
 import sys
@@ -326,6 +326,7 @@ def create_control_group():
     temp_females = [i for i in females]
     count = 2
     now = time.time()
+    check_list = []
     try:
         with open(f"{FILENAME}.csv", "r") as case:
             logging.info("Creating control group...")
@@ -337,19 +338,20 @@ def create_control_group():
                     for j, female in enumerate(temp_females):
                         if females[i] == female and j != 0:
                             try:
+                                check_list.append(female)
                                 index = [
                                     k * 2 + 1 for k in range(len(females))
                                     if females[k] == female
-                                ][1]
-                                control.write(f"{case_lines[count]}")
+                                ][check_list.count(female)]
+                                control.write(f"{case_lines[i * 2]}")
                                 control.write(f"{case_lines[index]}")
                                 control.flush()
+                                temp_females.pop(j)                               
+                                break
                             except IndexError:
                                 pass
-                            temp_females.pop(j)
-                            count += 2
-                            info(s=size, c=count, n=now)
-                            break
+                    info(s=size, c=count, n=now)
+                    count += 2
             file = f"Random_{FILENAME}.csv"
             length = len([i for i in open(file, "r")])
             os.rename(file, file.replace("41832", f"{length}"))
