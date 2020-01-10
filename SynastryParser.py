@@ -1144,7 +1144,7 @@ class App(tk.Menu):
         )
         self.help.add_command(
             label="Check for Updates",
-            command=self._update
+            command=self.update_script
         )
         self.frame = tk.Frame(
             master=self.master,
@@ -1676,7 +1676,7 @@ class App(tk.Menu):
         parent.destroy()
 
     @staticmethod
-    def _update():
+    def update_script():
         url_1 = "https://raw.githubusercontent.com/dildeolupbiten/" \
                 "SynastryParser/master/SynastryParser.py"
         url_2 = "https://raw.githubusercontent.com/dildeolupbiten/" \
@@ -1799,6 +1799,7 @@ def main():
     root.title("SynastryParser")
     root.resizable(height=False, width=False)
     app = App(master=root)
+    app.update_script()
     threading.Thread(target=app.mainloop).run()
 
 
