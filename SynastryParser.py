@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 
 import os
 import sys
@@ -358,6 +358,34 @@ def create_control_group():
             logging.info("Completed creating control group.")
     except FileNotFoundError:
         logging.info(f"{FILENAME}.csv is not found.")
+        
+        
+def split_gauquelin_data():
+    url = URL
+    data = [
+        [int(j) for j in i.decode().split(",")[1:6]][0]
+        for i in urllib.request.urlopen(url)
+    ]
+    males_before_1900 = [
+        data[i] for i in range(0, len(data), 2)
+        if data[i] < 1900
+    ]
+    males_after_1900 = [
+        data[i] for i in range(0, len(data), 2)
+        if data[i] >= 1900
+    ]
+    females_before_1900 = [
+        data[i] for i in range(1, len(data), 2)
+        if data[i] < 1900
+    ]
+    females_after_1900 = [
+        data[i] for i in range(1, len(data), 2)
+        if data[i] >= 1900
+    ]
+    print(len(males_before_1900))
+    print(len(males_after_1900))
+    print(len(females_before_1900))
+    print(len(females_after_1900))
     
 
 class Chart:
@@ -1092,6 +1120,12 @@ class App(tk.Menu):
                 target=create_control_group
             ).start()
         )
+        self.records.add_command(
+            label="Split Gauquelin Data",
+            command=lambda: threading.Thread(
+                target=split_gauquelin_data
+            ).start()
+        )
         self.frequency.add_command(
             label="Longitude Frequency",
             command=lambda: year_long_lati_frequency(
@@ -1800,7 +1834,6 @@ def main():
     root.title("SynastryParser")
     root.resizable(height=False, width=False)
     app = App(master=root)
-    app.update_script()
     threading.Thread(target=app.mainloop).run()
 
 
