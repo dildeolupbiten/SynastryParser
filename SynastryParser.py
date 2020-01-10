@@ -1069,24 +1069,25 @@ class App(tk.Menu):
         self.selected = []
         self.selected_obj = []
         self.modes = ["Natal", "Natal"]
+        self.records = tk.Menu(master=self, tearoff=False)
         self.convert = tk.Menu(master=self, tearoff=False)
         self.create = tk.Menu(master=self, tearoff=False)
         self.frequency = tk.Menu(master=self, tearoff=False)
         self.settings = tk.Menu(master=self, tearoff=False)
         self.help = tk.Menu(master=self, tearoff=False)
-        self.add_cascade(label="Convert", menu=self.convert)
-        self.add_cascade(label="Create", menu=self.create)
+        self.add_cascade(label="Records", menu=self.records)
         self.add_cascade(label="Frequency", menu=self.frequency)
         self.add_cascade(label="Settings", menu=self.settings)
         self.add_cascade(label="Help", menu=self.help)
-        self.convert.add_command(
-            label=f"Convert {FILENAME}.dat",
+        
+        self.records.add_command(
+            label=f"Convert Gauquelin Data",
             command=lambda: threading.Thread(
                 target=convert_raw_data
             ).start()
         )
-        self.create.add_command(
-            label="Control Group",
+        self.records.add_command(
+            label="Create Control Group",
             command=lambda: threading.Thread(
                 target=create_control_group
             ).start()
