@@ -168,6 +168,7 @@ OBJECTS = [
     "Jupiter",
     "Saturn",
     "Uranus",
+    "Neptune",
     "Pluto",
     "Mean",
     "True",
