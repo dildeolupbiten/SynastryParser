@@ -20,21 +20,17 @@ python3 SynastryParser.py
 
 ## Spreadsheets
 
-When the **"Conjunction"** and **"Sun"** check buttons are selected from **"Detailed** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
-
 ![img1](https://user-images.githubusercontent.com/29302909/72017449-c1f7e580-3276-11ea-88bf-c0f3cc51478a.jpeg)
-
-When the **"Conjunction"** and **"Moon"** check buttons are selected from **"Detailed** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
 
 ![img2](https://user-images.githubusercontent.com/29302909/72084373-6aa85280-3314-11ea-9eed-7a660391d5c9.jpeg)
 
-When the **"Sun"** and **"Sun"** check buttons are selected from **"Basic** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
-
 ![img3](https://user-images.githubusercontent.com/29302909/72083581-1baded80-3313-11ea-950e-b0c73c885407.jpeg)
 
-When the **"Sun"** and **"Moon"** check buttons are selected from **"Basic** menu button which is under the **"Settings"** cascade, a table similar to below will be created. 
-
 ![img4](https://user-images.githubusercontent.com/29302909/72084176-156c4100-3314-11ea-993a-d0aedc87f515.jpeg)
+
+![img5](https://user-images.githubusercontent.com/29302909/72211804-5dd95980-34e2-11ea-9998-3de4f2276fe2.jpeg)
+
+![img6](https://user-images.githubusercontent.com/29302909/72211825-af81e400-34e2-11ea-85cb-65987db2ff1a.jpeg)
 
 ## Notes
 
