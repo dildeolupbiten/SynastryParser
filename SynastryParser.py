@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.5"
+__version__ = "1.1.6"
 
 import os
 import sys
@@ -174,8 +174,6 @@ OBJECTS = [
     "True",
     "Chiron",
     "Juno",
-    "Asc.",
-    "MC"
 ]
 ASPECTS = [
     "Conjunction",
@@ -208,9 +206,19 @@ SST = {
     SIGNS[i]: 30 * i
     for i in range(len(SIGNS))
 }
-TABLE = {
+HOUSES = [f"H{i + 1}" for i in range(12)]
+TABLE2D = {
     i: {j: 0 for j in SIGNS}
     for i in SIGNS
+}
+TABLE3D = {
+    obj: {
+        sign: {
+            house: 0 for house in HOUSES
+        } 
+        for sign in SIGNS
+    }
+    for obj in OBJECTS
 }
 
 
@@ -363,19 +371,19 @@ def create_control_group():
 
 class Chart:
     PLANET_DICT = {
-        "Sun": swe.SUN,
-        "Moon": swe.MOON,
-        "Mercury": swe.MERCURY,
-        "Venus": swe.VENUS,
-        "Mars": swe.MARS,
-        "Jupiter": swe.JUPITER,
-        "Saturn": swe.SATURN,
-        "Uranus": swe.URANUS,
-        "Neptune": swe.NEPTUNE,
-        "Pluto": swe.PLUTO,
-        "North Node": swe.TRUE_NODE,
-        "Chiron": swe.CHIRON,
-        "Juno": swe.JUNO
+        OBJECTS[0]: swe.SUN,
+        OBJECTS[1]: swe.MOON,
+        OBJECTS[2]: swe.MERCURY,
+        OBJECTS[3]: swe.VENUS,
+        OBJECTS[4]: swe.MARS,
+        OBJECTS[5]: swe.JUPITER,
+        OBJECTS[6]: swe.SATURN,
+        OBJECTS[7]: swe.URANUS,
+        OBJECTS[8]: swe.NEPTUNE,
+        OBJECTS[9]: swe.PLUTO,
+        OBJECTS[10]: swe.TRUE_NODE,
+        OBJECTS[11]: swe.CHIRON,
+        OBJECTS[12]: swe.JUNO
     }
 
     def __init__(
@@ -421,33 +429,39 @@ class Chart:
         return house, asc, angle
 
     def patterns(self):
-        count = 0
         planet_positions = []
         house_positions = []
+        for i in range(12):
+            house = [
+                int(self.house_pos()[0][i][0]),
+                self.house_pos()[0][i][-1],
+                float(self.house_pos()[0][i][1]),                  
+            ]
+            house_positions.append(house)
+        hp = [j[-1] for j in house_positions]
         for key, value in self.PLANET_DICT.items():
             planet = self.planet_pos(planet=value)
+            house = 0
+            for i in range(12):
+                if i != 11:
+                    if hp[i] < planet[1] < hp[i + 1]:
+                        house = i + 1
+                        break
+                    elif hp[i] > 300 and 60 > hp[i + 1] > planet[1] < hp[i]:
+                        house = i + 1   
+                        break                     
+                else:                                  
+                    if hp[i] < planet[1] < hp[0]:
+                        house = i + 1
+                    elif hp[i] > 300 and 60 > hp[0] > planet[1] < hp[i]:
+                        house = i + 1
             planet_info = [
                 key,
                 planet[0],
-                planet[1]
+                planet[1],
+                f"H{house}"
             ]
             planet_positions.append(planet_info)
-            if count < 12:
-                house = [
-                    int(self.house_pos()[0][count][0]),
-                    self.house_pos()[0][count][-1],
-                    float(self.house_pos()[0][count][1]),                  
-                ]
-                house_positions.append(house)
-            else:
-                pass
-            count += 1
-        planet_positions.extend(
-            [
-                ["Asc.", *house_positions[0][1:]], 
-                ["MC", *house_positions[9][1:]]
-            ]
-        )        
         return planet_positions
            
        
@@ -649,8 +663,8 @@ def read_files(file: list = [], selected: list = [], modes: list = []):
         female = [float(j) for j in file[i + 1].strip().split(",")]
         splitted = activate_selections(
             selected=selected,
-            male=Chart(*male, "P").patterns(),
-            female=Chart(*female, "P").patterns(),
+            male=Chart(*male, "P").patterns()[:-1],
+            female=Chart(*female, "P").patterns()[:-1],
             modes=modes
         )
         split_list.append(splitted[1])
@@ -674,7 +688,7 @@ def read_file(file: str = "", arg1: str = "", arg2: str = ""):
             female = Chart(
                 *[float(col) for col in readlines[i + 1][:-1].split(",")], "P"
             ).patterns()[keys.index(arg2)][1]
-            TABLE[male][female] += 1
+            TABLE2D[male][female] += 1
             count += 2
             info(s=size, c=count, n=now)
         print()
@@ -691,7 +705,7 @@ class Spreadsheet(xlwt.Workbook):
     size = 3
     obj = None
 
-    def __init__(self, arg1: str = "" , arg2: str = ""):
+    def __init__(self, arg1: str = "", arg2: str = ""):
         xlwt.Workbook.__init__(self)
         self.arg1 = arg1
         self.arg2 = arg2
@@ -832,7 +846,12 @@ class Spreadsheet(xlwt.Workbook):
         except TypeError:
             pass
             
-    def write_basic(self, modes: list = [], selected_obj: list = []):
+    def write_basic(
+            self, 
+            table: dict = {}, 
+            modes: list = [], 
+            selected_obj: list = []
+    ):
         self.style.font = font(bold=True)
         self.sheet.write_merge(
             r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
@@ -856,7 +875,7 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=17, c=1, label="Total", style=self.style)
         self.style.font = font(bold=False)
         row = 5
-        for keys, values in TABLE.items():
+        for keys, values in table.items():
             column = 2
             for subkeys, subvalues in values.items():
                 self.sheet.write(
@@ -875,9 +894,9 @@ class Spreadsheet(xlwt.Workbook):
             )
             row += 1
         column = 2
-        for keys, values in TABLE.items():
+        for keys, values in table.items():
             col_t = 0           
-            for k, v in TABLE.items():
+            for k, v in table.items():
                 col_t += v[keys]
             self.sheet.write(
                 r=row, 
@@ -1279,7 +1298,7 @@ class App(tk.Menu):
             msgbox.showinfo(message="Detailed calculation finished.")
 
     def start(self, selected: list = [], selected_obj: list = []):
-        global TABLE
+        global TABLE2D
         aspects = {
             ASPECTS[0]: CONJUNCTION,
             ASPECTS[1]: SEMI_SEXTILE,
@@ -1358,19 +1377,20 @@ class App(tk.Menu):
             Spreadsheet(
                     arg1=selected_obj[0], arg2=selected_obj[1]
              ).write_basic(
+                table=TABLE2D,
                 modes=self.modes,
                 selected_obj=selected_obj
              )
             logging.info("Basic calculation finished.")
             msgbox.showinfo(message="Basic calculation finished.")
-            TABLE = {
+            TABLE2D = {
                 i: {j: 0 for j in SIGNS}
                 for i in SIGNS
             }
         else:
             msgbox.showinfo(
                 message="Please select 'Basic' or 'Detailed' calculations "
-                    "from 'Settings' menu."
+                        "from 'Settings' menu."
             )
 
     def select_tables(self, checkbuttons: dict = {}):
@@ -1486,7 +1506,7 @@ class App(tk.Menu):
                 checkbuttons=checkbuttons,
                 array=OBJECTS
             )
-        fill_left = tk.Frame(left_cb_frame, height=92)
+        fill_left = tk.Frame(left_cb_frame, height=69)
         fill_left.grid(row=12, column=0)
         apply_button = tk.Button(
             master=self.toplevel_detailed,
@@ -1501,10 +1521,10 @@ class App(tk.Menu):
             checkbuttons2: dict = {}
     ):
         self.selected_obj = []
-        for i in OBJECTS[:-2]:
+        for i in OBJECTS:
             if checkbuttons1[i][1].get() == "1":
                 self.selected_obj.append(i)
-        for i in OBJECTS[:-2]:
+        for i in OBJECTS:
             if checkbuttons2[i][1].get() == "1":
                 self.selected_obj.append(i)
         if len(self.selected_obj) != 2:
@@ -1553,14 +1573,14 @@ class App(tk.Menu):
         right_bottom.pack()
         checkbuttons1 = {}
         checkbuttons2 = {}
-        for i, j in enumerate(OBJECTS[:-2], 1):
+        for i, j in enumerate(OBJECTS, 1):
             self.checkbutton(
                 master=left_bottom,
                 text=j,
                 row=i,
                 column=0,
                 checkbuttons=checkbuttons1,
-                array=OBJECTS[:-2]
+                array=OBJECTS
             )
             self.checkbutton(
                 master=right_bottom,
@@ -1568,7 +1588,7 @@ class App(tk.Menu):
                 row=i,
                 column=0,
                 checkbuttons=checkbuttons2,
-                array=OBJECTS[:-2]
+                array=OBJECTS
             )
         apply_button = tk.Button(
             master=self.toplevel_basic,
