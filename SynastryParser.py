@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.6"
+__version__ = "1.1.7"
 
 import os
 import sys
@@ -211,14 +211,27 @@ TABLE2D = {
     i: {j: 0 for j in SIGNS}
     for i in SIGNS
 }
-TABLE3D = {
-    obj: {
-        sign: {
-            house: 0 for house in HOUSES
-        } 
-        for sign in SIGNS
-    }
-    for obj in OBJECTS
+TABLE4D = {
+    sign: {
+        house: {
+            _sign: {
+                _house: 0 for _house in HOUSES
+            }
+            for _sign in SIGNS
+        }
+        for house in HOUSES
+     }
+    for sign in SIGNS
+}
+HSYS = "P"
+HOUSE_SYSTEMS = {
+    "P": "Placidus",
+    "K": "Koch",
+    "O": "Porphyrius",
+    "R": "Regiomontanus",
+    "C": "Campanus",
+    "E": "Equal",
+    "W": "Whole Signs"
 }
 
 
@@ -449,12 +462,17 @@ class Chart:
                         break
                     elif hp[i] > 300 and 60 > hp[i + 1] > planet[1] < hp[i]:
                         house = i + 1   
-                        break                     
+                        break
+                    elif 300 < hp[i] < planet[1] > hp[i + 1] < 60:
+                        house = i + 1   
+                        break                      
                 else:                                  
                     if hp[i] < planet[1] < hp[0]:
                         house = i + 1
                     elif hp[i] > 300 and 60 > hp[0] > planet[1] < hp[i]:
                         house = i + 1
+                    elif 300 < hp[i] < planet[1] > hp[0] < 60:
+                        house = i + 1   
             planet_info = [
                 key,
                 planet[0],
@@ -654,7 +672,11 @@ def count_aspects_2(split_list: list = [], selected: list = []):
     return final
     
     
-def read_files(file: list = [], selected: list = [], modes: list = []):
+def r_aspect_dist_acc_to_planets(
+        file: list = [],
+        selected: list = [],
+        modes: list = []
+):
     file_list = []
     split_list = []
     n = len(file)
@@ -663,8 +685,8 @@ def read_files(file: list = [], selected: list = [], modes: list = []):
         female = [float(j) for j in file[i + 1].strip().split(",")]
         splitted = activate_selections(
             selected=selected,
-            male=Chart(*male, "P").patterns()[:-1],
-            female=Chart(*female, "P").patterns()[:-1],
+            male=Chart(*male, HSYS).patterns()[:-1],
+            female=Chart(*female, HSYS).patterns()[:-1],
             modes=modes
         )
         split_list.append(splitted[1])
@@ -672,9 +694,13 @@ def read_files(file: list = [], selected: list = [], modes: list = []):
     item1 = file_list[0]   
     return count_aspects_1(item1, file_list, 1), \
         count_aspects_2(split_list, selected)
+
         
-        
-def read_file(file: str = "", arg1: str = "", arg2: str = ""):
+def r_planet_dist_acc_to_signs(
+        file: str = "",
+        arg1: str = "",
+        arg2: str = ""
+):
     keys = list(Chart.PLANET_DICT.keys())
     with open(file, "r") as f:
         readlines = f.readlines()
@@ -683,12 +709,40 @@ def read_file(file: str = "", arg1: str = "", arg2: str = ""):
         count = 0
         for i in range(0, size, 2):
             male = Chart(
-                *[float(col) for col in readlines[i][:-1].split(",")], "P"
+                *[float(col) for col in readlines[i][:-1].split(",")],
+                HSYS
             ).patterns()[keys.index(arg1)][1]
             female = Chart(
-                *[float(col) for col in readlines[i + 1][:-1].split(",")], "P"
+                *[float(col) for col in readlines[i + 1][:-1].split(",")],
+                HSYS
             ).patterns()[keys.index(arg2)][1]
             TABLE2D[male][female] += 1
+            count += 2
+            info(s=size, c=count, n=now)
+        print()
+
+
+def r_planet_sign_dist_acc_to_houses(
+        file: str = "",
+        arg1: str = "",
+        arg2: str = "",
+):
+    keys = list(Chart.PLANET_DICT.keys())
+    with open(file, "r") as f:
+        readlines = f.readlines()
+        size = len(readlines)
+        now = time.time()
+        count = 0
+        for i in range(0, size, 2):
+            male = Chart(
+                *[float(col) for col in readlines[i][:-1].split(",")],
+                HSYS
+            ).patterns()[keys.index(arg1)]
+            female = Chart(
+                *[float(col) for col in readlines[i + 1][:-1].split(",")],
+                HSYS
+            ).patterns()[keys.index(arg2)]
+            TABLE4D[male[1]][male[-1]][female[1]][female[-1]] += 1
             count += 2
             info(s=size, c=count, n=now)
         print()
@@ -705,10 +759,18 @@ class Spreadsheet(xlwt.Workbook):
     size = 3
     obj = None
 
-    def __init__(self, arg1: str = "", arg2: str = ""):
+    def __init__(
+            self, 
+            arg1: str = "", 
+            arg2: str = "", 
+            arg3: str = "", 
+            arg4: str = ""
+    ):
         xlwt.Workbook.__init__(self)
         self.arg1 = arg1
         self.arg2 = arg2
+        self.arg3 = arg3
+        self.arg4 = arg4
         self.sheet = self.add_sheet("Sheet1")
         self.style = xlwt.XFStyle()
         self.alignment = xlwt.Alignment()
@@ -716,7 +778,7 @@ class Spreadsheet(xlwt.Workbook):
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
 
-    def write(self, table: dict = {}, aspect: str = ""):
+    def w_aspect_dist_acc_to_planets(self, table: dict = {}, aspect: str = ""):
         temporary = {}
         transpose = np.transpose([i for i in table.values()])
         arr = [[int(j) for j in list(i)] for i in transpose]
@@ -773,7 +835,7 @@ class Spreadsheet(xlwt.Workbook):
             self, file: list = [], selected: list = [],
             modes: list = [], num: int = 0
     ):
-        read = read_files(file, selected, modes)
+        read = r_aspect_dist_acc_to_planets(file, selected, modes)
         self.style.font = font(bold=True)
         self.sheet.write_merge(
             r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
@@ -790,7 +852,7 @@ class Spreadsheet(xlwt.Workbook):
                 count = 0
                 for index, aspect in enumerate(ASPECTS):
                     if aspect in selected:
-                        self.write(
+                        self.w_aspect_dist_acc_to_planets(
                             tables[selected.index(aspect)],
                             aspect,
                         )
@@ -846,7 +908,7 @@ class Spreadsheet(xlwt.Workbook):
         except TypeError:
             pass
             
-    def write_basic(
+    def w_planet_dist_acc_to_signs(
             self, 
             table: dict = {}, 
             modes: list = [], 
@@ -911,8 +973,92 @@ class Spreadsheet(xlwt.Workbook):
                 "SUM(C18:N18)"
             ),
             style=self.style)
-        self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")
-            
+        self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")            
+
+    def w_planet_sign_dist_acc_to_houses(
+            self, 
+            table: dict = {}, 
+            modes: list = [], 
+            selected_obj: list = [],
+            selected_sign: list = []
+    ):
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=0, c1=0, r2=0, c2=1, label="House System", style=self.style)
+        self.style.font = font(bold=False)
+        self.sheet.write(
+            r=0, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
+        )
+        self.style.font = font(bold=True)
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=1, c1=0, r2=2, c2=0, label="Mode", style=self.style
+        )
+        self.sheet.write(r=1, c=1, label="1. Person", style=self.style)
+        self.sheet.write(r=1, c=2, label="2. Person", style=self.style)
+        self.style.font = font(bold=False)
+        self.sheet.write(r=2, c=1, label=modes[0], style=self.style)
+        self.sheet.write(r=2, c=2, label=modes[1], style=self.style)
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=4,
+            c1=2, 
+            r2=4,
+            c2=13, 
+            label=f"{selected_obj[0]} ({selected_sign[0]})",
+            style=self.style
+        )
+        self.sheet.write_merge(
+            r1=6,
+            c1=0, 
+            r2=17,
+            c2=0, 
+            label=f"{selected_obj[1]}\n({selected_sign[1]})",
+            style=self.style
+        )
+        for i, i_ in enumerate(HOUSES):
+            self.sheet.write(r=5, c=i + 2, label=i_, style=self.style)
+            self.sheet.write(r=i + 6, c=1, label=i_, style=self.style)
+        self.sheet.write(r=5, c=14, label="Total", style=self.style)
+        self.sheet.write(r=18, c=1, label="Total", style=self.style)
+        self.style.font = font(bold=False)
+        column = 2
+        for i in HOUSES:
+            row = 6
+            for j in HOUSES:
+                value = table[selected_sign[0]][i][selected_sign[-1]][j]
+                self.sheet.write(
+                    r=row,
+                    c=column,
+                    label=value,
+                    style=self.style
+                )
+                row += 1
+            column += 1
+        letters = "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+        for i in range(12):
+            self.sheet.write(
+                18, i + 2,
+                xlwt.Formula(
+                    f"SUM({letters[i]}6:{letters[i]}17)"
+                ),
+                style=self.style)
+            self.sheet.write(
+                i + 6, 14,
+                xlwt.Formula(
+                    f"SUM(C{i + 7}:N{i + 7})"
+                ),
+                style=self.style)
+        self.sheet.write(
+            18, 14,
+            xlwt.Formula(
+                f"SUM(O7:O18)"
+            ),
+            style=self.style)
+        self.save(
+            f"Male_{self.arg1}_{self.arg3}_"
+            f"Female_{self.arg2}_{self.arg4}.xlsx"
+        )         
             
 class Plot:
 
@@ -1083,23 +1229,28 @@ class App(tk.Menu):
     def __init__(self, master=None):
         tk.Menu.__init__(self, master)
         self.master.configure(menu=self)
-        self.toplevel_detailed = None
-        self.toplevel_basic = None
-        self.toplevel_mode = None
+        self.t_aspect_dist_acc_to_planets = None
+        self.t_planet_dist_acc_to_signs = None
+        self.t_planet_sign_dist_acc_to_houses = None
+        self.t_mode = None
+        self.t_orb = None
+        self.t_hsys = None
         self.selected = []
         self.selected_obj = []
+        self.selected_sign = []
         self.modes = ["Natal", "Natal"]
         self.records = tk.Menu(master=self, tearoff=False)
         self.convert = tk.Menu(master=self, tearoff=False)
         self.create = tk.Menu(master=self, tearoff=False)
         self.frequency = tk.Menu(master=self, tearoff=False)
         self.settings = tk.Menu(master=self, tearoff=False)
+        self.tables = tk.Menu(master=self, tearoff=False)
         self.help = tk.Menu(master=self, tearoff=False)
         self.add_cascade(label="Records", menu=self.records)
         self.add_cascade(label="Frequency", menu=self.frequency)
         self.add_cascade(label="Settings", menu=self.settings)
+        self.add_cascade(label="Tables", menu=self.tables)
         self.add_cascade(label="Help", menu=self.help)
-        
         self.records.add_command(
             label=f"Convert Gauquelin Data",
             command=lambda: threading.Thread(
@@ -1134,24 +1285,35 @@ class App(tk.Menu):
             label="Age Difference Frequency",
             command=age_differences_frequency
         )
-        self.settings.add_command(
-            label="Basic",
+        self.tables.add_command(
+            label="Planet distribution according to signs",
             command=lambda: self.open_toplevel(
-                toplevel=self.toplevel_basic,
-                func=self.basic
+                toplevel=self.t_planet_dist_acc_to_signs,
+                func=self.planet_dist_acc_to_signs
+            )
+        )
+        self.tables.add_command(
+            label="Aspect distribution according to planets",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_aspect_dist_acc_to_planets,
+                func=self.aspect_dist_acc_to_planets
+            )
+        )
+        self.tables.add_command(
+            label="Planet-Sign distribution according to houses",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_planet_sign_dist_acc_to_houses,
+                func=self.planet_sign_dist_acc_to_houses
             )
         )
         self.settings.add_command(
-            label="Detailed",
-            command=lambda: self.open_toplevel(
-                toplevel=self.toplevel_detailed,
-                func=self.detailed
-            )
+            label="House System",
+            command=self.create_hsys_checkbuttons
         )
         self.settings.add_command(
             label="Mode",
             command=lambda: self.open_toplevel(
-                toplevel=self.toplevel_mode,
+                toplevel=self.t_mode,
                 func=self.mode
             )
         )
@@ -1178,7 +1340,11 @@ class App(tk.Menu):
             text="Start",
             command=lambda: threading.Thread(
                 target=self.start,
-                args=(self.selected, self.selected_obj)
+                args=(
+                    self.selected,
+                    self.selected_obj,
+                    self.selected_sign
+                )
             ).start()
         )
         self.style = xlwt.XFStyle()
@@ -1294,11 +1460,22 @@ class App(tk.Menu):
             logging.info("Completed merging the separated files.")
             os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
             self.master.update()
-            logging.info("Detailed calculation finished.")
-            msgbox.showinfo(message="Detailed calculation finished.")
+            logging.info(
+                "Calculation of 'Aspect distribution according to planets' "
+                "is completed."
+            )
+            msgbox.showinfo(
+                message="Calculation of 'Aspect distribution according to "
+                        "planets' calculation completed."
+            )
 
-    def start(self, selected: list = [], selected_obj: list = []):
-        global TABLE2D
+    def start(
+            self,
+            selected: list = [],
+            selected_obj: list = [], 
+            selected_sign: list = []
+    ):
+        global TABLE2D, TABLE4D
         aspects = {
             ASPECTS[0]: CONJUNCTION,
             ASPECTS[1]: SEMI_SEXTILE,
@@ -1312,7 +1489,8 @@ class App(tk.Menu):
             ASPECTS[9]: QUINCUNX,
             ASPECTS[10]: OPPOSITE,                        
         }
-        if len(selected) == 2 and len(selected_obj) == 0:
+        if len(selected) == 2 and len(selected_obj) == 0 \
+                and len(selected_sign) == 0:
             try:            
                 file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -1330,7 +1508,10 @@ class App(tk.Menu):
                     f"\u00b0"
                 )
                 logging.info(f"Mode: {', '.join(self.modes)}")
-                logging.info("Detailed calculation started.")
+                logging.info(
+                    "Calculation of 'Aspect distribution according to "
+                    "planets' calculation started."
+                )
                 logging.info(
                     f"Separating {len(files)} records into files..."
                 )
@@ -1358,7 +1539,8 @@ class App(tk.Menu):
                 self.run()
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2:
+        elif len(selected) == 0 and len(selected_obj) == 2 and \
+                len(selected_sign) == 0:
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -1368,49 +1550,94 @@ class App(tk.Menu):
                 f"Selected Objects: {', '.join(selected_obj)}"
             )
             logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info("Basic calculation started.")
-            read_file(
+            logging.info(
+                "Calculation of 'Planet distribution according to "
+                "signs' is started."
+            )
+            r_planet_dist_acc_to_signs(
                 file=ask_file, 
                 arg1=selected_obj[0], 
                 arg2=selected_obj[1]
             )     
             Spreadsheet(
-                    arg1=selected_obj[0], arg2=selected_obj[1]
-             ).write_basic(
+                arg1=selected_obj[0],
+                arg2=selected_obj[1]
+             ).w_planet_dist_acc_to_signs(
                 table=TABLE2D,
                 modes=self.modes,
                 selected_obj=selected_obj
              )
-            logging.info("Basic calculation finished.")
-            msgbox.showinfo(message="Basic calculation finished.")
+            logging.info(
+                "Calculation of 'Planet distribution according to "
+                "signs' is completed."
+            )
+            msgbox.showinfo(
+                message="Calculation of 'Planet distribution according to "
+                        "signs' is completed."
+            )
             TABLE2D = {
                 i: {j: 0 for j in SIGNS}
                 for i in SIGNS
             }
+        elif len(selected) == 0 and len(selected_obj) == 2 and \
+                len(selected_sign) == 2:
+            ask_file = filedialog.askopenfilename(
+                filetypes=[("CSV File", ".csv")]
+            )
+            s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"Number of records: {s}")
+            logging.info(
+                f"Selected Objects: {', '.join(selected_obj)}"
+            )
+            logging.info(
+                f"Selected Signs: {', '.join(selected_sign)}"
+            )
+            logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
+            logging.info(f"Mode: {', '.join(self.modes)}")
+            logging.info(
+                "Calculation of 'Planet-Sign distribution "
+                "according to houses' is started."
+            )
+            r_planet_sign_dist_acc_to_houses(
+                file=ask_file,
+                arg1=selected_obj[0],
+                arg2=selected_obj[1],
+            )
+            Spreadsheet(
+                arg1=selected_obj[0],
+                arg2=selected_obj[1],
+                arg3=selected_sign[0],
+                arg4=selected_sign[1]
+             ).w_planet_sign_dist_acc_to_houses(
+                table=TABLE4D,
+                modes=self.modes,
+                selected_obj=selected_obj,
+                selected_sign=selected_sign
+             )
+            logging.info(
+                "Calculation of 'Planet-Sign distribution "
+                "according to houses' is completed."
+            )
+            msgbox.showinfo(
+                message="Calculation of 'Planet-Sign distribution "
+                        "according to houses' is completed."
+            )
+            TABLE4D = {
+                sign: {
+                    house: {
+                        _sign: {
+                            _house: 0 for _house in HOUSES
+                        }
+                        for _sign in SIGNS
+                    }
+                    for house in HOUSES
+                }
+                for sign in SIGNS
+            }
         else:
             msgbox.showinfo(
-                message="Please select 'Basic' or 'Detailed' calculations "
-                        "from 'Settings' menu."
+                message="Please select one table to be calculated."
             )
-
-    def select_tables(self, checkbuttons: dict = {}):
-        self.selected = []
-        for i, j in enumerate(ASPECTS):
-            if "_" in j:
-                j = j.replace("_", "-")
-            if j != "null" and checkbuttons[j][1].get() == "1":
-                self.selected.append(j)
-        for i in OBJECTS:
-            if checkbuttons[i][1].get() == "1":
-                self.selected.append(i)
-        if len(self.selected) != 2:
-            msgbox.showinfo(
-                message="Please select one aspect and one planet."
-            )
-        else:
-            self.toplevel_detailed.destroy()
-            self.toplevel_detailed = None
-            self.selected_obj = []
 
     @staticmethod
     def check_uncheck(
@@ -1448,12 +1675,36 @@ class App(tk.Menu):
                 text
             )
         )
+        
+    def select_tables(self, checkbuttons: dict = {}):
+        self.selected = []
+        for i, j in enumerate(ASPECTS):
+            if "_" in j:
+                j = j.replace("_", "-")
+            if j != "null" and checkbuttons[j][1].get() == "1":
+                self.selected.append(j)
+        for i in OBJECTS:
+            if checkbuttons[i][1].get() == "1":
+                self.selected.append(i)
+        if len(self.selected) != 2:
+            msgbox.showinfo(
+                message="Please select one aspect and one planet."
+            )
+        else:
+            self.t_aspect_dist_acc_to_planets.destroy()
+            self.t_aspect_dist_acc_to_planets = None
+            self.selected_obj = []
+            self.selected_sign = []
 
-    def detailed(self):
-        self.toplevel_detailed = tk.Toplevel()
-        self.toplevel_detailed.title("Detailed")
-        self.toplevel_detailed.resizable(width=False, height=False)
-        main_frame = tk.Frame(master=self.toplevel_detailed)
+    def aspect_dist_acc_to_planets(self):
+        self.t_aspect_dist_acc_to_planets = tk.Toplevel()
+        self.t_aspect_dist_acc_to_planets.title(
+            "Aspect distribution according to planets"
+        )
+        self.t_aspect_dist_acc_to_planets.resizable(
+            width=False, height=False
+        )
+        main_frame = tk.Frame(master=self.t_aspect_dist_acc_to_planets)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
@@ -1509,7 +1760,7 @@ class App(tk.Menu):
         fill_left = tk.Frame(left_cb_frame, height=69)
         fill_left.grid(row=12, column=0)
         apply_button = tk.Button(
-            master=self.toplevel_detailed,
+            master=self.t_aspect_dist_acc_to_planets,
             text="Apply",
             command=lambda: self.select_tables(checkbuttons)
         )
@@ -1532,16 +1783,21 @@ class App(tk.Menu):
                 message="Please select at least two objects."
             )
         else:
-            self.toplevel_basic.destroy()
-            self.toplevel_basic = None
+            self.t_planet_dist_acc_to_signs.destroy()
+            self.t_planet_dist_acc_to_signs = None
             self.selected = []
+            self.selected_sign = []
         
-    def basic(self):
-        self.toplevel_basic = tk.Toplevel()
-        self.toplevel_basic.title("Basic")
-        self.toplevel_basic.geometry("250x400")
-        self.toplevel_basic.resizable(width=False, height=False)
-        main_frame = tk.Frame(master=self.toplevel_basic)
+    def planet_dist_acc_to_signs(self):
+        self.t_planet_dist_acc_to_signs = tk.Toplevel()
+        self.t_planet_dist_acc_to_signs.title(
+            "Planet Distribution According To Signs"
+        )
+        self.t_planet_dist_acc_to_signs.geometry("400x400")
+        self.t_planet_dist_acc_to_signs.resizable(
+            width=False, height=False
+        )
+        main_frame = tk.Frame(master=self.t_planet_dist_acc_to_signs)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
@@ -1591,23 +1847,146 @@ class App(tk.Menu):
                 array=OBJECTS
             )
         apply_button = tk.Button(
-            master=self.toplevel_basic,
+            master=self.t_planet_dist_acc_to_signs,
             text="Apply",
-            command=lambda: self.select_objects(checkbuttons1, checkbuttons2)
+            command=lambda: self.select_objects(
+                checkbuttons1,
+                checkbuttons2
+            )
+        )
+        apply_button.pack(side="bottom")
+        
+    def select_objects_signs(
+            self, 
+            checkbuttons1: dict = {}, 
+            checkbuttons2: dict = {},
+            checkbuttons3: dict = {},
+            checkbuttons4: dict = {}
+    ):
+        self.selected_obj = []
+        self.selected_sign = []
+        for i in OBJECTS:
+            if checkbuttons1[i][1].get() == "1":
+                self.selected_obj.append(i)
+        for i in OBJECTS:
+            if checkbuttons2[i][1].get() == "1":
+                self.selected_obj.append(i)
+        for i in SIGNS:
+            if checkbuttons3[i][1].get() == "1":
+                self.selected_sign.append(i)
+        for i in SIGNS:
+            if checkbuttons4[i][1].get() == "1":
+                self.selected_sign.append(i)
+        if len(self.selected_obj) != 2 and len(self.selected_sign) != 2:
+            msgbox.showinfo(
+                message="Please select at least two objects and "
+                        "two signs."
+            )
+        else:
+            self.t_planet_sign_dist_acc_to_houses.destroy()
+            self.t_planet_sign_dist_acc_to_houses = None
+            self.selected = []
+        
+    def planet_sign_dist_acc_to_houses(self):
+        self.t_planet_sign_dist_acc_to_houses = tk.Toplevel()
+        self.t_planet_sign_dist_acc_to_houses.title(
+            "Planet-Sign distribution according to houses"
+        )
+        self.t_planet_sign_dist_acc_to_houses.geometry("400x400")
+        self.t_planet_sign_dist_acc_to_houses.resizable(
+            width=False, height=False
+        )
+        main_frame = tk.Frame(master=self.t_planet_sign_dist_acc_to_houses)
+        main_frame.pack()
+        left_frame = tk.Frame(
+            master=main_frame, 
+            bd=1, 
+            relief="sunken"
+        )
+        left_frame.pack(side="left")
+        label_left = tk.Label(
+            master=left_frame,
+            text="Select a planet and a sign\nfor 1'st person",
+            fg="red"
+        )
+        label_left.pack()
+        left_bottom = tk.Frame(master=left_frame)
+        left_bottom.pack()
+        right_frame = tk.Frame(
+            master=main_frame,
+            bd=1,
+            relief="sunken"
+        )
+        right_frame.pack(side="left")
+        label_right = tk.Label(
+            master=right_frame,
+            text="Select a planet and a sign \nfor 2'nd person",
+            fg="red"
+        )
+        label_right.pack()
+        right_bottom = tk.Frame(master=right_frame)
+        right_bottom.pack()
+        checkbuttons1 = {}
+        checkbuttons2 = {}
+        checkbuttons3 = {}
+        checkbuttons4 = {}
+        for i, j in enumerate(OBJECTS, 1):
+            self.checkbutton(
+                master=left_bottom,
+                text=j,
+                row=i,
+                column=0,
+                checkbuttons=checkbuttons1,
+                array=OBJECTS
+            )
+            self.checkbutton(
+                master=right_bottom,
+                text=j,
+                row=i,
+                column=0,
+                checkbuttons=checkbuttons2,
+                array=OBJECTS
+            )
+        for i, j in enumerate(SIGNS, 1):
+            self.checkbutton(
+                master=left_bottom,
+                text=j,
+                row=i,
+                column=1,
+                checkbuttons=checkbuttons3,
+                array=SIGNS
+            )
+            self.checkbutton(
+                master=right_bottom,
+                text=j,
+                row=i,
+                column=1,
+                checkbuttons=checkbuttons4,
+                array=SIGNS
+            )
+        apply_button = tk.Button(
+            master=self.t_planet_sign_dist_acc_to_houses,
+            text="Apply",
+            command=lambda: self.select_objects_signs(
+                checkbuttons1, 
+                checkbuttons2,
+                checkbuttons3,
+                checkbuttons4
+            )
         )
         apply_button.pack(side="bottom")
 
     def change_mode(self, variables: list = []):
         self.modes = [i.get() for i in variables]
-        self.toplevel_mode.destroy()
-        self.toplevel_mode = None
+        self.t_mode.destroy()
+        self.t_mode = None
 
     def mode(self):
-        self.toplevel_mode = tk.Toplevel()
-        self.toplevel_mode.title("Mode")
-        self.toplevel_mode.resizable(width=False, height=False)
+        self.t_mode = tk.Toplevel()
+        self.t_mode.title("Mode")
+        self.t_mode.resizable(width=False, height=False)
         self.modes = []
-        main_frame = tk.Frame(master=self.toplevel_mode)
+        main_frame = tk.Frame(master=self.t_mode)
         main_frame.pack()
         variables = []
         for i in range(2):
@@ -1628,7 +2007,7 @@ class App(tk.Menu):
             optionmenu.grid(row=1, column=0)
             variables.append(var)
         apply = tk.Button(
-            master=self.toplevel_mode,
+            master=self.t_mode,
             text="Apply",
             command=lambda: self.change_mode(variables=variables)
         )
@@ -1643,9 +2022,9 @@ class App(tk.Menu):
             func()
 
     def choose_orb_factor(self):
-        toplevel = tk.Toplevel()
-        toplevel.title("Orb Factor")
-        toplevel.resizable(width=False, height=False)
+        self.t_orb = tk.Toplevel()
+        self.t_orb.title("Orb Factor")
+        self.t_orb.resizable(width=False, height=False)
         default_orbs = [
             CONJUNCTION, 
             SEMI_SEXTILE, 
@@ -1661,26 +2040,125 @@ class App(tk.Menu):
         ]
         orb_entries = []
         for i, j in enumerate(ASPECTS[:-1]):
-            aspect_label = tk.Label(master=toplevel, text=f"{j}")
+            aspect_label = tk.Label(master=self.t_orb, text=f"{j}")
             aspect_label.grid(row=i, column=0, sticky="w")
-            equal_to = tk.Label(master=toplevel, text="=")
+            equal_to = tk.Label(master=self.t_orb, text="=")
             equal_to.grid(row=i, column=1, sticky="e")
-            orb_entry = tk.Entry(master=toplevel, width=5)
+            orb_entry = tk.Entry(master=self.t_orb, width=5)
             orb_entry.grid(row=i, column=2)
             orb_entry.insert(0, default_orbs[i])
             orb_entries.append(orb_entry)
         apply_button = tk.Button(
-            master=toplevel,
+            master=self.t_orb,
             text="Apply",
             command=lambda: self.change_orb_factors(
-                parent=toplevel,
                 orb_entries=orb_entries
             )
         )
         apply_button.grid(row=11, column=0, columnspan=3)
+        
+    def change_hsys(self, checkbuttons, _house_systems_):
+        global HSYS
+        if checkbuttons[_house_systems_[0]][1].get() == "1":
+            HSYS = "P"
+        elif checkbuttons[_house_systems_[1]][1].get() == "1":
+            HSYS = "K"
+        elif checkbuttons[_house_systems_[2]][1].get() == "1":
+            HSYS = "O"
+        elif checkbuttons[_house_systems_[3]][1].get() == "1":
+            HSYS = "R"
+        elif checkbuttons[_house_systems_[4]][1].get() == "1":
+            HSYS = "C"
+        elif checkbuttons[_house_systems_[5]][1].get() == "1":
+            HSYS = "E"
+        elif checkbuttons[_house_systems_[6]][1].get() == "1":
+            HSYS = "W"
+        self.t_hsys.destroy()
+        self.t_hsys = None
 
-    @staticmethod
-    def change_orb_factors(parent=None, orb_entries: list = []):
+    def create_hsys_checkbuttons(self):
+        self.t_hsys = tk.Toplevel()
+        self.t_hsys.title("House System")
+        self.t_hsys.geometry("200x200")
+        self.t_hsys.resizable(width=False, height=False)
+        hsys_frame = tk.Frame(master=self.t_hsys)
+        hsys_frame.pack(side="top")
+        button_frame = tk.Frame(master=self.t_hsys)
+        button_frame.pack(side="bottom")
+        _house_systems_ = [values for keys, values in HOUSE_SYSTEMS.items()]
+        checkbuttons = {}
+        for i, j in enumerate(_house_systems_):
+            _var_ = tk.StringVar()
+            if j == HOUSE_SYSTEMS[HSYS]:
+                _var_.set(value="1")
+            else:
+                _var_.set(value="0")
+            _checkbutton_ = tk.Checkbutton(
+                master=hsys_frame,
+                text=j,
+                variable=_var_)
+            _checkbutton_.grid(row=i, column=0, sticky="w")
+            checkbuttons[j] = [_checkbutton_, _var_]
+        checkbuttons["Placidus"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Placidus"
+            )
+        )
+        checkbuttons["Koch"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Koch"
+            )
+        )
+        checkbuttons["Porphyrius"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Porphyrius"
+            )
+        )
+        checkbuttons["Regiomontanus"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Regiomontanus"
+            )
+        )
+        checkbuttons["Campanus"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Campanus"
+            )
+        )
+        checkbuttons["Equal"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Equal"
+            )
+        )
+        checkbuttons["Whole Signs"][0].configure(
+            command=lambda: self.check_uncheck(
+                checkbuttons,
+                _house_systems_,
+                "Whole Signs"
+            )
+        )
+        apply_button = tk.Button(
+            master=button_frame,
+            text="Apply",
+            command=lambda: self.change_hsys(
+                checkbuttons,
+                _house_systems_
+            )
+        )
+        apply_button.pack()
+
+    def change_orb_factors(self, orb_entries: list = []):
         global CONJUNCTION, SEMI_SEXTILE, SEMI_SQUARE, SEXTILE
         global QUINTILE, SQUARE, TRINE, SESQUIQUADRATE, BIQUINTILE
         global QUINCUNX, OPPOSITE
@@ -1695,7 +2173,8 @@ class App(tk.Menu):
         BIQUINTILE = int(orb_entries[8].get())
         QUINCUNX = int(orb_entries[9].get())
         OPPOSITE = int(orb_entries[10].get())
-        parent.destroy()
+        self.t_orb.destroy()
+        self.t_orb = None
 
     @staticmethod
     def update_script():
