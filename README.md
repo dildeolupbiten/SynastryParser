@@ -24,13 +24,13 @@ python3 SynastryParser.py
 
 ![img2](https://user-images.githubusercontent.com/29302909/72084373-6aa85280-3314-11ea-9eed-7a660391d5c9.jpeg)
 
-![img3](https://user-images.githubusercontent.com/29302909/72083581-1baded80-3313-11ea-950e-b0c73c885407.jpeg)
+![img3](https://user-images.githubusercontent.com/29302909/72212425-f543aa00-34ec-11ea-9444-f4b789b6ef76.jpeg)
 
-![img4](https://user-images.githubusercontent.com/29302909/72084176-156c4100-3314-11ea-993a-d0aedc87f515.jpeg)
+![img4](https://user-images.githubusercontent.com/29302909/72212427-fd034e80-34ec-11ea-9ec5-449d34e2c48a.jpeg)
 
-![img5](https://user-images.githubusercontent.com/29302909/72211804-5dd95980-34e2-11ea-9998-3de4f2276fe2.jpeg)
+![img5](https://user-images.githubusercontent.com/29302909/72212430-fecd1200-34ec-11ea-9625-b0e70226863e.jpeg)
 
-![img6](https://user-images.githubusercontent.com/29302909/72211825-af81e400-34e2-11ea-85cb-65987db2ff1a.jpeg)
+![img6](https://user-images.githubusercontent.com/29302909/72212432-0096d580-34ed-11ea-84ab-6f2f12979522.jpeg)
 
 ## Notes
 
