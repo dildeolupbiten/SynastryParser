@@ -771,6 +771,9 @@ class Spreadsheet(xlwt.Workbook):
         self.arg2 = arg2
         self.arg3 = arg3
         self.arg4 = arg4
+        self.letters = [
+            "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+        ]
         self.sheet = self.add_sheet("Sheet1")
         self.style = xlwt.XFStyle()
         self.alignment = xlwt.Alignment()
@@ -937,42 +940,45 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=17, c=1, label="Total", style=self.style)
         self.style.font = font(bold=False)
         row = 5
-        for keys, values in table.items():
-            column = 2
+        column = 2       
+        for keys, values in table.items():            
+            r = 0
             for subkeys, subvalues in values.items():
                 self.sheet.write(
-                    r=row, 
+                    r=row + r, 
                     c=column, 
                     label=subvalues, 
                     style=self.style
                 )
-                column += 1
-            row_t = sum([i for i in values.values()])
+                r += 1
+            column += 1
+        column = 2
+        row = 5
+        for i in self.letters:
             self.sheet.write(
-                r=row, 
-                c=column, 
-                label=row_t, 
+                17, column,
+                xlwt.Formula(
+                    f"SUM({i}6:{i}17)"
+                ),
                 style=self.style
             )
-            row += 1
-        column = 2
-        for keys, values in table.items():
-            col_t = 0           
-            for k, v in table.items():
-                col_t += v[keys]
+            
             self.sheet.write(
-                r=row, 
-                c=column, 
-                label=col_t, 
+                row, 14,
+                xlwt.Formula(
+                    f"SUM(C{row + 1}:N{row + 1})"
+                ),
                 style=self.style
             )
             column += 1
+            row += 1
         self.sheet.write(
-            row, column,
+            17, 14,
             xlwt.Formula(
-                "SUM(C18:N18)"
+                f"SUM(C18:N18)"
             ),
-            style=self.style)
+            style=self.style
+        )
         self.save(f"Male_{self.arg1}_Female_{self.arg2}.xlsx")            
 
     def w_planet_sign_dist_acc_to_houses(
@@ -1035,12 +1041,11 @@ class Spreadsheet(xlwt.Workbook):
                 )
                 row += 1
             column += 1
-        letters = "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
         for i in range(12):
             self.sheet.write(
                 18, i + 2,
                 xlwt.Formula(
-                    f"SUM({letters[i]}6:{letters[i]}17)"
+                    f"SUM({self.letters[i]}6:{self.letters[i]}17)"
                 ),
                 style=self.style)
             self.sheet.write(
