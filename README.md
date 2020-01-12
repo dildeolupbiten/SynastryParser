@@ -32,7 +32,7 @@ python3 SynastryParser.py
 
 **3.**
 
-![img5](https://user-images.githubusercontent.com/29302909/72226909-811a0c80-35a7-11ea-92e8-036c19a04b91.png)
+![img5](https://user-images.githubusercontent.com/29302909/72227008-b70bc080-35a8-11ea-96c5-9cc90dcfd8ea.png)
 ![img6](https://user-images.githubusercontent.com/29302909/72226911-870fed80-35a7-11ea-8c88-ef7fe9c481d6.jpeg)
 
 **4.**
