@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.9"
+__version__ = "1.2.0"
 
 import os
 import sys
@@ -207,15 +207,31 @@ SST = {
     for i in range(len(SIGNS))
 }
 HOUSES = [f"H{i + 1}" for i in range(12)]
-TABLE_S_S = {
+TBL_SS = {
     i: {j: 0 for j in SIGNS}
     for i in SIGNS
 }
-TABLE_H_H = {
+TBL_HH_PRSNL = {
     i: {j: 0 for j in HOUSES}
     for i in HOUSES
 }
-TABLE_P_S_P_S = {
+TBL_HH_SYNSTRY = {
+    i: {j: 0 for j in HOUSES}
+    for i in HOUSES
+}
+TBL_PSPS_PRSNL = {
+    sign: {
+        house: {
+            _sign: {
+                _house: 0 for _house in HOUSES
+            }
+            for _sign in SIGNS
+        }
+        for house in HOUSES
+     }
+    for sign in SIGNS
+}
+TBL_PSPS_SYNSTRY = {
     sign: {
         house: {
             _sign: {
@@ -484,7 +500,7 @@ class Chart:
                 f"H{house}"
             ]
             planet_positions.append(planet_info)
-        return planet_positions
+        return planet_positions, house_positions
            
        
 def find_aspect(natal1: list = [], natal2: list = []):
@@ -689,8 +705,8 @@ def r_aspect_dist_acc_to_planets(
         female = [float(j) for j in file[i + 1].strip().split(",")]
         splitted = activate_selections(
             selected=selected,
-            male=[j[:-1] for j in Chart(*male, HSYS).patterns()],
-            female=[j[:-1] for j in Chart(*female, HSYS).patterns()],
+            male=[j[:-1] for j in Chart(*male, HSYS).patterns()[0]],
+            female=[j[:-1] for j in Chart(*female, HSYS).patterns()[0]],
             modes=modes
         )
         split_list.append(splitted[1])
@@ -698,6 +714,69 @@ def r_aspect_dist_acc_to_planets(
     item1 = file_list[0]   
     return count_aspects_1(item1, file_list, 1), \
         count_aspects_2(split_list, selected)
+
+
+def synastry_pos(chart1: list = [], chart2: list = []):
+    hp = [j[-1] for j in chart2[1]]
+    for ind, planet in enumerate(chart1[0]):
+        house = 0
+        for i in range(12):
+            if i != 11:
+                if hp[i] < planet[-2] < hp[i + 1]:
+                    house = i + 1
+                    break
+                elif hp[i] > 300 and 60 > hp[i + 1] > planet[-2] < hp[i]:
+                    house = i + 1
+                    break
+                elif 300 < hp[i] < planet[-2] > hp[i + 1] < 60:
+                    house = i + 1
+                    break
+            else:
+                if hp[i] < planet[-2] < hp[0]:
+                    house = i + 1
+                elif hp[i] > 300 and 60 > hp[0] > planet[-2] < hp[i]:
+                    house = i + 1
+                elif 300 < hp[i] < planet[-2] > hp[0] < 60:
+                    house = i + 1
+        chart1[0][ind].append(f"H{house}")
+    return chart1[0]
+
+
+def r_syn_planet_dist_acc_to_signs_or_houses(
+        file: str = "",
+        arg1: str = "",
+        arg2: str = "",
+        table: dict = {},
+):
+    keys = list(Chart.PLANET_DICT.keys())
+    with open(file, "r") as f:
+        readlines = f.readlines()
+        size = len(readlines)
+        now = time.time()
+        count = 0
+        for i in range(0, size, 2):
+            old_male = Chart(
+                *[
+                    float(col) 
+                    for col in readlines[i][:-1].split(",")
+                ],
+                HSYS
+            ).patterns()
+            old_female = Chart(
+                *[
+                    float(col) 
+                    for col in readlines[i + 1][:-1].split(",")
+                ],
+                HSYS
+            ).patterns()
+            male = synastry_pos(
+                old_male, old_female)[keys.index(arg1)][-1]
+            female = synastry_pos(
+                old_female, old_male)[keys.index(arg2)][-1]
+            table[male][female] += 1
+            count += 2
+            info(s=size, c=count, n=now)
+        print()
 
         
 def r_planet_dist_acc_to_signs_or_houses(
@@ -717,11 +796,11 @@ def r_planet_dist_acc_to_signs_or_houses(
             male = Chart(
                 *[float(col) for col in readlines[i][:-1].split(",")],
                 HSYS
-            ).patterns()[keys.index(arg1)][index]
+            ).patterns()[0][keys.index(arg1)][index]
             female = Chart(
                 *[float(col) for col in readlines[i + 1][:-1].split(",")],
                 HSYS
-            ).patterns()[keys.index(arg2)][index]
+            ).patterns()[0][keys.index(arg2)][index]
             table[male][female] += 1
             count += 2
             info(s=size, c=count, n=now)
@@ -740,15 +819,47 @@ def r_planet_sign_dist_acc_to_houses(
         now = time.time()
         count = 0
         for i in range(0, size, 2):
-            male = Chart(
+            old_male = Chart(
                 *[float(col) for col in readlines[i][:-1].split(",")],
                 HSYS
-            ).patterns()[keys.index(arg1)]
-            female = Chart(
+            ).patterns()
+            old_female = Chart(
                 *[float(col) for col in readlines[i + 1][:-1].split(",")],
                 HSYS
-            ).patterns()[keys.index(arg2)]
-            TABLE_P_S_P_S[male[1]][male[-1]][female[1]][female[-1]] += 1
+            ).patterns()
+            male = synastry_pos(
+                old_male, old_female)[keys.index(arg1)][-1]
+            female = synastry_pos(
+                old_female, old_male)[keys.index(arg2)][-1]
+            TBL_PSPS_PRSNL[male[1]][male[-1]][female[1]][female[-1]] += 1
+            count += 2
+            info(s=size, c=count, n=now)
+        print()
+
+
+def r_syn_planet_sign_dist_acc_to_houses(
+        file: str = "",
+        arg1: str = "",
+        arg2: str = "",
+):
+    keys = list(Chart.PLANET_DICT.keys())
+    with open(file, "r") as f:
+        readlines = f.readlines()
+        size = len(readlines)
+        now = time.time()
+        count = 0
+        for i in range(0, size, 2):
+            old_male = Chart(
+                *[float(col) for col in readlines[i][:-1].split(",")],
+                HSYS
+            ).patterns()
+            old_female = Chart(
+                *[float(col) for col in readlines[i + 1][:-1].split(",")],
+                HSYS
+            ).patterns()
+            male = synastry_pos(old_male, old_female)[keys.index(arg1)]
+            female = synastry_pos(old_female, old_male)[keys.index(arg2)]
+            TBL_PSPS_SYNSTRY[male[1]][male[-1]][female[1]][female[-1]] += 1
             count += 2
             info(s=size, c=count, n=now)
         print()
@@ -849,8 +960,8 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write_merge(
             r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
         )
-        self.sheet.write(r=0, c=1, label="1. Person", style=self.style)
-        self.sheet.write(r=0, c=2, label="2. Person", style=self.style)
+        self.sheet.write(r=0, c=1, label="Males", style=self.style)
+        self.sheet.write(r=0, c=2, label="Females", style=self.style)
         self.style.font = font(bold=False)
         self.sheet.write(r=1, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=1, c=2, label=modes[1], style=self.style)
@@ -873,7 +984,8 @@ class Spreadsheet(xlwt.Workbook):
                                         r2=self.size + 13,
                                         c1=0,
                                         c2=0,
-                                        label=j,
+                                        label="Females'\n" + j +
+                                              "\nin Signs",
                                         style=self.style
                                     )
                                     self.sheet.write_merge(
@@ -881,7 +993,8 @@ class Spreadsheet(xlwt.Workbook):
                                         r2=self.size,
                                         c1=2,
                                         c2=13,
-                                        label=i,
+                                        label="Males' " + i +
+                                              " in Signs",
                                         style=self.style
                                     )
                                     for k in SIGNS:
@@ -942,18 +1055,29 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write_merge(
             r1=_row, c1=0, r2=_row + 1, c2=0, label="Mode", style=self.style
         )
-        self.sheet.write(r=_row, c=1, label="1. Person", style=self.style)
-        self.sheet.write(r=_row, c=2, label="2. Person", style=self.style)
+        self.sheet.write(r=_row, c=1, label="Males", style=self.style)
+        self.sheet.write(r=_row, c=2, label="Females", style=self.style)
         self.style.font = font(bold=False)
         self.sheet.write(r=_row + 1, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=_row + 1, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
+        if selection == "house":
+            male_label = "Males' " + selected_obj[0] + " in Houses"
+            female_label = "Females'\n" + selected_obj[1] + "\nin Houses"
+        elif selection == "synastry_house":
+            male_label = "Males' " + selected_obj[0] + " in Females' Houses"
+            female_label = "Females'\n" + selected_obj[1] + "\nin Males'\nHouses"
+        else:
+            male_label = "Males' " + selected_obj[0] + " in Signs"
+            female_label = "Females'\n" + selected_obj[1] + "\nin Signs"
         self.sheet.write_merge(
-            r1=_row + 3, c1=2, r2=_row + 3, c2=13, label=selected_obj[0],
+            r1=_row + 3, c1=2, r2=_row + 3, c2=13,
+            label=male_label,
             style=self.style
         )
         self.sheet.write_merge(
-            r1=_row + 5, c1=0, r2=_row + 16, c2=0, label=selected_obj[1],
+            r1=_row + 5, c1=0, r2=_row + 16, c2=0,
+            label=female_label,
             style=self.style
         )
         for i, i_ in enumerate(arg):
@@ -1012,7 +1136,8 @@ class Spreadsheet(xlwt.Workbook):
             table: dict = {}, 
             modes: list = [], 
             selected_obj: list = [],
-            selected_sign: list = []
+            selected_sign: list = [],
+            selection: str = ""
     ):
         self.style.font = font(bold=True)
         self.sheet.write_merge(
@@ -1025,18 +1150,30 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write_merge(
             r1=1, c1=0, r2=2, c2=0, label="Mode", style=self.style
         )
-        self.sheet.write(r=1, c=1, label="1. Person", style=self.style)
-        self.sheet.write(r=1, c=2, label="2. Person", style=self.style)
+        self.sheet.write(r=1, c=1, label="Males", style=self.style)
+        self.sheet.write(r=1, c=2, label="Females", style=self.style)
         self.style.font = font(bold=False)
         self.sheet.write(r=2, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=2, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
+        if selection == "synastry planet-sign":
+            male_label = f"Males' {selected_obj[0]} "\
+                         f"({selected_sign[0]}) in Females' Houses"
+            female_label = f"Females'\n{selected_obj[1]}\n"\
+                           f"({selected_sign[1]})\nin Males'\nHouses"
+            filename = "Synastry"
+        else:
+            male_label = f"Males' {selected_obj[0]} "\
+                         f"({selected_sign[0]}) in Houses"
+            female_label = f"Females'\n{selected_obj[1]}\n"\
+                           f"({selected_sign[1]})\nin Houses"
+            filename = "Personal"
         self.sheet.write_merge(
             r1=4,
             c1=2, 
             r2=4,
             c2=13, 
-            label=f"{selected_obj[0]} ({selected_sign[0]})",
+            label=male_label,
             style=self.style
         )
         self.sheet.write_merge(
@@ -1044,7 +1181,7 @@ class Spreadsheet(xlwt.Workbook):
             c1=0, 
             r2=17,
             c2=0, 
-            label=f"{selected_obj[1]}\n({selected_sign[1]})",
+            label=female_label,
             style=self.style
         )
         for i, i_ in enumerate(HOUSES):
@@ -1086,10 +1223,11 @@ class Spreadsheet(xlwt.Workbook):
             ),
             style=self.style)
         self.save(
-            f"Male_{self.arg1}_{self.arg3}_"
+            f"{filename}_Male_{self.arg1}_{self.arg3}_"
             f"Female_{self.arg2}_{self.arg4}.xlsx"
         )         
-            
+
+
 class Plot:
 
     @staticmethod
@@ -1262,7 +1400,9 @@ class App(tk.Menu):
         self.t_aspect_dist_acc_to_planets = None
         self.t_planet_dist_acc_to_signs = None
         self.t_planet_dist_acc_to_houses = None
+        self.t_syn_planet_dist_acc_to_houses = None
         self.t_planet_sign_dist_acc_to_houses = None
+        self.t_syn_planet_sign_dist_acc_to_houses = None
         self.t_mode = None
         self.t_orb = None
         self.t_hsys = None
@@ -1318,17 +1458,40 @@ class App(tk.Menu):
             command=age_differences_frequency
         )
         self.tables.add_command(
-            label="Planet distribution according to signs",
+            label="Sign positions of planets",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_planet_dist_acc_to_signs,
                 func=self.planet_dist_acc_to_signs
             )
         )
         self.tables.add_command(
-            label="Planet distribution according to houses",
+            label="Personal house positions of planets",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_planet_dist_acc_to_houses,
-                func=self.planet_dist_acc_to_houses
+                func=lambda: self.planet_dist_acc_to_houses(
+                    title="Personal House positions of planets",
+                    selection="house"
+                )
+            )
+        )
+        self.tables.add_command(
+            label="Synastry house positions of planets",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_syn_planet_dist_acc_to_houses,
+                func=lambda: self.planet_dist_acc_to_houses(
+                    title="Synastry House Positions of Planets",
+                    selection="synastry_house"
+                )
+            )
+        )
+        self.tables.add_command(
+            label="Synastry house positions of planets-signs",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_syn_planet_sign_dist_acc_to_houses,
+                func=lambda: self.planet_sign_dist_acc_to_houses(
+                    title="Synastry house positions of planets-signs",
+                    selection="synastry planet-sign"
+                )
             )
         )
         self.tables.add_command(
@@ -1339,10 +1502,13 @@ class App(tk.Menu):
             )
         )
         self.tables.add_command(
-            label="Planet-Sign distribution according to houses",
+            label="Personal house positions of planets-signs",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_planet_sign_dist_acc_to_houses,
-                func=self.planet_sign_dist_acc_to_houses
+                func=lambda: self.planet_sign_dist_acc_to_houses(
+                    title="Personal house positions of planets-signs",
+                    selection="planet-sign"
+                )
             )
         )
         self.settings.add_command(
@@ -1408,7 +1574,7 @@ class App(tk.Menu):
                 r1=i[0][0], 
                 r2=i[0][0], 
                 c1=i[0][1], 
-                c2=i[0][1] + 15,
+                c2=i[0][1] + 13,
                 label=i[1], 
                 style=self.style
             )
@@ -1423,7 +1589,8 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(21, 232, 15)]:
+        elif i[0][0] in [i__ for i__ in range(19, 230, 15)]:
+            pass
             new_sheet.write_merge(
                 r1=i[0][0], 
                 r2=i[0][0], 
@@ -1432,7 +1599,7 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(23, 246, 15)] \
+        elif i[0][0] in [i__ for i__ in range(21, 246, 15)] \
                 and i[0][1] == 0:
             new_sheet.write_merge(
                 r1=i[0][0], 
@@ -1514,7 +1681,8 @@ class App(tk.Menu):
             selected_obj: list = [], 
             selected_sign: list = []
     ):
-        global TABLE_S_S, TABLE_H_H, TABLE_P_S_P_S
+        global TBL_SS, TBL_HH_PRSNL, TBL_PSPS_PRSNL
+        global TBL_HH_SYNSTRY, TBL_PSPS_SYNSTRY
         aspects = {
             ASPECTS[0]: CONJUNCTION,
             ASPECTS[1]: SEMI_SEXTILE,
@@ -1549,7 +1717,7 @@ class App(tk.Menu):
                 logging.info(f"Mode: {', '.join(self.modes)}")
                 logging.info(
                     "Calculation of 'Aspect distribution according to "
-                    "planets' calculation started."
+                    "planets' is started."
                 )
                 logging.info(
                     f"Separating {len(files)} records into files..."
@@ -1597,14 +1765,14 @@ class App(tk.Menu):
                 file=ask_file, 
                 arg1=selected_obj[0], 
                 arg2=selected_obj[1],
-                table=TABLE_S_S,
+                table=TBL_SS,
                 index=1
             )     
             Spreadsheet(
                 arg1=selected_obj[0],
                 arg2=selected_obj[1]
              ).w_planet_dist_acc_to_signs_or_houses(
-                table=TABLE_S_S,
+                table=TBL_SS,
                 modes=self.modes,
                 selected_obj=selected_obj,
                 selection="sign"
@@ -1617,7 +1785,7 @@ class App(tk.Menu):
                 message="Calculation of 'Planet distribution according to "
                         "signs' is completed."
             )
-            TABLE_S_S = {
+            TBL_SS = {
                 i: {j: 0 for j in SIGNS}
                 for i in SIGNS
             }
@@ -1643,14 +1811,14 @@ class App(tk.Menu):
                 file=ask_file,
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
-                table=TABLE_H_H,
+                table=TBL_HH_PRSNL,
                 index=-1
             )
             Spreadsheet(
                 arg1=selected_obj[0],
                 arg2=selected_obj[1]
             ).w_planet_dist_acc_to_signs_or_houses(
-                table=TABLE_H_H,
+                table=TBL_HH_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
                 selection="house"
@@ -1663,12 +1831,57 @@ class App(tk.Menu):
                 message="Calculation of 'Planet distribution according to "
                         "houses' is completed."
             )
-            TABLE_H_H = {
+            TBL_HH_PRSNL = {
                 i: {j: 0 for j in HOUSES}
                 for i in HOUSES
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 2:
+                len(selected_sign) == 0 and self.selection == "synastry_house":
+            ask_file = filedialog.askopenfilename(
+                filetypes=[("CSV File", ".csv")]
+            )
+            s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"Number of records: {s}")
+            logging.info(
+                f"Selected Objects: {', '.join(selected_obj)}"
+            )
+            logging.info(
+                f"House System: {HOUSE_SYSTEMS[HSYS]}"
+            )
+            logging.info(f"Mode: {', '.join(self.modes)}")
+            logging.info(
+                "Calculation of 'Synastry house positions of "
+                "planets' is started."
+            )
+            r_syn_planet_dist_acc_to_signs_or_houses(
+                file=ask_file,
+                arg1=selected_obj[0],
+                arg2=selected_obj[1],
+                table=TBL_HH_SYNSTRY,
+            )
+            Spreadsheet(
+                arg1=selected_obj[0],
+                arg2=selected_obj[1]
+            ).w_planet_dist_acc_to_signs_or_houses(
+                table=TBL_HH_SYNSTRY,
+                modes=self.modes,
+                selected_obj=selected_obj,
+                selection="synastry_house"
+            )
+            logging.info(
+                "Calculation of 'Synastry house positions of "
+                "planets' is completed."
+            )
+            msgbox.showinfo(
+                message="Calculation of 'Synastry house positions of "
+                        "planets' is completed."
+            )
+            TBL_HH_SYNSTRY = {
+                i: {j: 0 for j in HOUSES}
+                for i in HOUSES
+            }
+        elif len(selected) == 0 and len(selected_obj) == 2 and \
+                len(selected_sign) == 2 and self.selection == "planet-sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -1697,10 +1910,11 @@ class App(tk.Menu):
                 arg3=selected_sign[0],
                 arg4=selected_sign[1]
              ).w_planet_sign_dist_acc_to_houses(
-                table=TABLE_P_S_P_S,
+                table=TBL_PSPS_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selected_sign=selected_sign
+                selected_sign=selected_sign,
+                selection=self.selection
              )
             logging.info(
                 "Calculation of 'Planet-Sign distribution "
@@ -1710,7 +1924,64 @@ class App(tk.Menu):
                 message="Calculation of 'Planet-Sign distribution "
                         "according to houses' is completed."
             )
-            TABLE_P_S_P_S = {
+            TBL_PSPS_PRSNL = {
+                sign: {
+                    house: {
+                        _sign: {
+                            _house: 0 for _house in HOUSES
+                        }
+                        for _sign in SIGNS
+                    }
+                    for house in HOUSES
+                }
+                for sign in SIGNS
+            }
+        elif len(selected) == 0 and len(selected_obj) == 2 and \
+                len(selected_sign) == 2 and \
+                self.selection == "synastry planet-sign":
+            ask_file = filedialog.askopenfilename(
+                filetypes=[("CSV File", ".csv")]
+            )
+            s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"Number of records: {s}")
+            logging.info(
+                f"Selected Objects: {', '.join(selected_obj)}"
+            )
+            logging.info(
+                f"Selected Signs: {', '.join(selected_sign)}"
+            )
+            logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
+            logging.info(f"Mode: {', '.join(self.modes)}")
+            logging.info(
+                "Calculation of 'Synastry house positions "
+                "of planets-signs' is started."
+            )
+            r_syn_planet_sign_dist_acc_to_houses(
+                file=ask_file,
+                arg1=selected_obj[0],
+                arg2=selected_obj[1],
+            )
+            Spreadsheet(
+                arg1=selected_obj[0],
+                arg2=selected_obj[1],
+                arg3=selected_sign[0],
+                arg4=selected_sign[1]
+             ).w_planet_sign_dist_acc_to_houses(
+                table=TBL_PSPS_SYNSTRY,
+                modes=self.modes,
+                selected_obj=selected_obj,
+                selected_sign=selected_sign,
+                selection=self.selection
+             )
+            logging.info(
+                "Calculation of 'Synastry house positions "
+                "of planets-signs' is completed."
+            )
+            msgbox.showinfo(
+                message="Calculation of 'Synastry house "
+                        "positions of planets-signs' is completed."
+            )
+            TBL_PSPS_SYNSTRY = {
                 sign: {
                     house: {
                         _sign: {
@@ -1897,7 +2168,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet\nfor 1'st person",
+            text="Select a planet\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -1911,7 +2182,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet\nfor 2'nd person",
+            text="Select a planet\nfor females",
             fg="red"
         )
         label_right.pack()
@@ -1968,12 +2239,10 @@ class App(tk.Menu):
             self.selected = []
             self.selected_sign = []
 
-    def planet_dist_acc_to_houses(self):
-        self.selection = "house"
+    def planet_dist_acc_to_houses(self, title, selection):
+        self.selection = selection
         self.t_planet_dist_acc_to_houses = tk.Toplevel()
-        self.t_planet_dist_acc_to_houses.title(
-            "Planet Distribution According To Houses"
-        )
+        self.t_planet_dist_acc_to_houses.title(title)
         self.t_planet_dist_acc_to_houses.geometry("400x400")
         self.t_planet_dist_acc_to_houses.resizable(
             width=False, height=False
@@ -1988,7 +2257,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet\nfor 1'st person",
+            text="Select a planet\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -2002,7 +2271,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet\nfor 2'nd person",
+            text="Select a planet\nfor females",
             fg="red"
         )
         label_right.pack()
@@ -2068,11 +2337,10 @@ class App(tk.Menu):
             self.t_planet_sign_dist_acc_to_houses = None
             self.selected = []
         
-    def planet_sign_dist_acc_to_houses(self):
+    def planet_sign_dist_acc_to_houses(self, title, selection):
+        self.selection = selection
         self.t_planet_sign_dist_acc_to_houses = tk.Toplevel()
-        self.t_planet_sign_dist_acc_to_houses.title(
-            "Planet-Sign distribution according to houses"
-        )
+        self.t_planet_sign_dist_acc_to_houses.title(title)
         self.t_planet_sign_dist_acc_to_houses.geometry("400x400")
         self.t_planet_sign_dist_acc_to_houses.resizable(
             width=False, height=False
@@ -2087,7 +2355,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet and a sign\nfor 1'st person",
+            text="Select a planet and a sign\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -2101,7 +2369,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet and a sign \nfor 2'nd person",
+            text="Select a planet and a sign \nfor females",
             fg="red"
         )
         label_right.pack()
@@ -2170,12 +2438,12 @@ class App(tk.Menu):
         main_frame = tk.Frame(master=self.t_mode)
         main_frame.pack()
         variables = []
-        for i in range(2):
+        for i, j in enumerate(("Males", "Females")):
             frame = tk.Frame(master=main_frame, relief="sunken", bd=1)
             frame.grid(row=0, column=i)
             label = tk.Label(
                 master=frame,
-                text=f"{i + 1}. Person",
+                text=j,
                 fg="red"
             )
             label.grid(row=0, column=0)
