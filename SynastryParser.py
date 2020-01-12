@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.1.7"
+__version__ = "1.1.8"
 
 import os
 import sys
@@ -10,6 +10,7 @@ import time
 import logging
 import platform
 import threading
+import traceback
 import subprocess
 import webbrowser
 import tkinter as tk
@@ -170,7 +171,6 @@ OBJECTS = [
     "Uranus",
     "Neptune",
     "Pluto",
-    "Mean",
     "True",
     "Chiron",
     "Juno",
@@ -685,8 +685,8 @@ def r_aspect_dist_acc_to_planets(
         female = [float(j) for j in file[i + 1].strip().split(",")]
         splitted = activate_selections(
             selected=selected,
-            male=Chart(*male, HSYS).patterns()[:-1],
-            female=Chart(*female, HSYS).patterns()[:-1],
+            male=[j[:-1] for j in Chart(*male, HSYS).patterns()],
+            female=[j[:-1] for j in Chart(*female, HSYS).patterns()],
             modes=modes
         )
         split_list.append(splitted[1])
@@ -1542,8 +1542,8 @@ class App(tk.Menu):
                 )
                 logging.info(f"Merging the separated files...")
                 self.run()
-            except:
-                pass
+            except Exception:
+                traceback.print_exc(file=sys.stdout)
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 0:
             ask_file = filedialog.askopenfilename(
@@ -1706,6 +1706,7 @@ class App(tk.Menu):
         self.t_aspect_dist_acc_to_planets.title(
             "Aspect distribution according to planets"
         )
+        self.t_aspect_dist_acc_to_planets.geometry("400x350")
         self.t_aspect_dist_acc_to_planets.resizable(
             width=False, height=False
         )
@@ -1762,7 +1763,7 @@ class App(tk.Menu):
                 checkbuttons=checkbuttons,
                 array=OBJECTS
             )
-        fill_left = tk.Frame(left_cb_frame, height=69)
+        fill_left = tk.Frame(left_cb_frame, height=46)
         fill_left.grid(row=12, column=0)
         apply_button = tk.Button(
             master=self.t_aspect_dist_acc_to_planets,
