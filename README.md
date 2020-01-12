@@ -20,21 +20,35 @@ python3 SynastryParser.py
 
 ## Spreadsheets
 
-![img1](https://user-images.githubusercontent.com/29302909/72017449-c1f7e580-3276-11ea-88bf-c0f3cc51478a.jpeg)
+**1.**
 
-![img2](https://user-images.githubusercontent.com/29302909/72084373-6aa85280-3314-11ea-9eed-7a660391d5c9.jpeg)
+![img1](https://user-images.githubusercontent.com/29302909/72226866-0c46d280-35a7-11ea-8777-5a06da5689b2.png)
+![img2](https://user-images.githubusercontent.com/29302909/72226867-1072f000-35a7-11ea-98fd-a79301024b21.jpeg)
 
-![img3](https://user-images.githubusercontent.com/29302909/72212425-f543aa00-34ec-11ea-9444-f4b789b6ef76.jpeg)
+**2.**
 
-![img4](https://user-images.githubusercontent.com/29302909/72212427-fd034e80-34ec-11ea-9ec5-449d34e2c48a.jpeg)
+![img3](https://user-images.githubusercontent.com/29302909/72226903-765f7780-35a7-11ea-9040-30c1ece1e1ea.png)
+![img4](https://user-images.githubusercontent.com/29302909/72226905-795a6800-35a7-11ea-8d5e-10f4dcb92cf8.jpeg)
 
-![img5](https://user-images.githubusercontent.com/29302909/72212430-fecd1200-34ec-11ea-9625-b0e70226863e.jpeg)
+**3.**
 
-![img6](https://user-images.githubusercontent.com/29302909/72212432-0096d580-34ed-11ea-84ab-6f2f12979522.jpeg)
+![img5](https://user-images.githubusercontent.com/29302909/72226909-811a0c80-35a7-11ea-92e8-036c19a04b91.png)
+![img6](https://user-images.githubusercontent.com/29302909/72226911-870fed80-35a7-11ea-8c88-ef7fe9c481d6.jpeg)
 
-![img7](https://user-images.githubusercontent.com/29302909/72219115-6ddd5180-3553-11ea-8233-e60d627a9c4b.jpeg)
+**4.**
 
-![img8](https://user-images.githubusercontent.com/29302909/72219117-6fa71500-3553-11ea-944e-38e320d737c0.jpeg)
+![img7](https://user-images.githubusercontent.com/29302909/72226913-8c6d3800-35a7-11ea-9da3-fe4a5e476a0d.png)
+![img8](https://user-images.githubusercontent.com/29302909/72226915-92631900-35a7-11ea-9515-13e647057c60.jpeg)
+
+**5.**
+
+![img9](https://user-images.githubusercontent.com/29302909/72226916-998a2700-35a7-11ea-8616-9c0bcc0ec272.png)
+![img10](https://user-images.githubusercontent.com/29302909/72226918-9c851780-35a7-11ea-91fc-0a1555c606a6.jpeg)
+
+**6.**
+
+![img11](https://user-images.githubusercontent.com/29302909/72226919-a149cb80-35a7-11ea-9413-11e34387b93f.png)
+![img12](https://user-images.githubusercontent.com/29302909/72226921-a3ac2580-35a7-11ea-93fd-70e5f281d0e3.jpeg)
 
 ## Notes
 
