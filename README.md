@@ -32,6 +32,10 @@ python3 SynastryParser.py
 
 ![img6](https://user-images.githubusercontent.com/29302909/72212432-0096d580-34ed-11ea-84ab-6f2f12979522.jpeg)
 
+![img7](https://user-images.githubusercontent.com/29302909/72219115-6ddd5180-3553-11ea-8233-e60d627a9c4b.jpeg)
+
+![img8](https://user-images.githubusercontent.com/29302909/72219117-6fa71500-3553-11ea-944e-38e320d737c0.jpeg)
+
 ## Notes
 
 **1.** The tables may not be opened by Microsoft Excel. Therefore it is recommended to use [Libre Office](https://www.libreoffice.org/download/download/). 
