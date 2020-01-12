@@ -1458,6 +1458,13 @@ class App(tk.Menu):
             command=age_differences_frequency
         )
         self.tables.add_command(
+            label="Aspect distributions of planets",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_aspect_dist_acc_to_planets,
+                func=self.aspect_dist_acc_to_planets
+            )
+        )
+        self.tables.add_command(
             label="Sign positions of planets",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_planet_dist_acc_to_signs,
@@ -1465,49 +1472,42 @@ class App(tk.Menu):
             )
         )
         self.tables.add_command(
-            label="Personal house positions of planets",
+            label="House positions of planets (Personal)",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_planet_dist_acc_to_houses,
                 func=lambda: self.planet_dist_acc_to_houses(
-                    title="Personal House positions of planets",
+                    title="House positions of planets (Personal)",
                     selection="house"
                 )
             )
         )
         self.tables.add_command(
-            label="Synastry house positions of planets",
+            label="House positions of planets-signs (Personal)",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_planet_sign_dist_acc_to_houses,
+                func=lambda: self.planet_sign_dist_acc_to_houses(
+                    title="House positions of planets-signs (Personal)",
+                    selection="planet-sign"
+                )
+            )
+        )
+        self.tables.add_command(
+            label="House positions of planets (Synastry)",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_syn_planet_dist_acc_to_houses,
                 func=lambda: self.planet_dist_acc_to_houses(
-                    title="Synastry House Positions of Planets",
+                    title="House positions of planets (Synastry)",
                     selection="synastry_house"
                 )
             )
         )
         self.tables.add_command(
-            label="Synastry house positions of planets-signs",
+            label="House positions of planets-signs (Synastry)",
             command=lambda: self.open_toplevel(
                 toplevel=self.t_syn_planet_sign_dist_acc_to_houses,
                 func=lambda: self.planet_sign_dist_acc_to_houses(
-                    title="Synastry house positions of planets-signs",
+                    title="House positions of planets-signs (Synastry)",
                     selection="synastry planet-sign"
-                )
-            )
-        )
-        self.tables.add_command(
-            label="Aspect distribution according to planets",
-            command=lambda: self.open_toplevel(
-                toplevel=self.t_aspect_dist_acc_to_planets,
-                func=self.aspect_dist_acc_to_planets
-            )
-        )
-        self.tables.add_command(
-            label="Personal house positions of planets-signs",
-            command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_sign_dist_acc_to_houses,
-                func=lambda: self.planet_sign_dist_acc_to_houses(
-                    title="Personal house positions of planets-signs",
-                    selection="planet-sign"
                 )
             )
         )
@@ -1667,11 +1667,11 @@ class App(tk.Menu):
             os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
             self.master.update()
             logging.info(
-                "Calculation of 'Aspect distribution according to planets' "
+                "Calculation of 'Aspect distributions of planets' "
                 "is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Aspect distribution according to "
+                message="Calculation of 'Aspect distributions of "
                         "planets' calculation completed."
             )
 
@@ -1716,7 +1716,7 @@ class App(tk.Menu):
                 )
                 logging.info(f"Mode: {', '.join(self.modes)}")
                 logging.info(
-                    "Calculation of 'Aspect distribution according to "
+                    "Calculation of 'Aspect distributions of "
                     "planets' is started."
                 )
                 logging.info(
@@ -1758,8 +1758,7 @@ class App(tk.Menu):
             )
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Planet distribution according to "
-                "signs' is started."
+                "Calculation of 'Sign positions of planets' is started."
             )
             r_planet_dist_acc_to_signs_or_houses(
                 file=ask_file, 
@@ -1778,12 +1777,10 @@ class App(tk.Menu):
                 selection="sign"
              )
             logging.info(
-                "Calculation of 'Planet distribution according to "
-                "signs' is completed."
+                "Calculation of 'Sign positions of planets' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Planet distribution according to "
-                        "signs' is completed."
+                message="Calculation of 'Sign positions of planets' is completed."
             )
             TBL_SS = {
                 i: {j: 0 for j in SIGNS}
@@ -1804,8 +1801,8 @@ class App(tk.Menu):
             )
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Planet distribution according to "
-                "houses' is started."
+                "Calculation of 'House positions of "
+                "planets (Personal)' is started."
             )
             r_planet_dist_acc_to_signs_or_houses(
                 file=ask_file,
@@ -1824,12 +1821,12 @@ class App(tk.Menu):
                 selection="house"
             )
             logging.info(
-                "Calculation of 'Planet distribution according to "
-                "houses' is completed."
+                "Calculation of 'House positions of "
+                "planets (Personal)' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Planet distribution according to "
-                        "houses' is completed."
+                message="Calculation of 'House positions of "
+                        "planets (Personal)' is completed."
             )
             TBL_HH_PRSNL = {
                 i: {j: 0 for j in HOUSES}
@@ -1850,8 +1847,8 @@ class App(tk.Menu):
             )
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Synastry house positions of "
-                "planets' is started."
+                "Calculation of 'House positions of "
+                "planets (Synastry)' is started."
             )
             r_syn_planet_dist_acc_to_signs_or_houses(
                 file=ask_file,
@@ -1869,12 +1866,12 @@ class App(tk.Menu):
                 selection="synastry_house"
             )
             logging.info(
-                "Calculation of 'Synastry house positions of "
-                "planets' is completed."
+                "Calculation of 'House positions of "
+                "planets (Synastry)' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Synastry house positions of "
-                        "planets' is completed."
+                message="Calculation of 'House positions of "
+                        "planets (Synastry)' is completed."
             )
             TBL_HH_SYNSTRY = {
                 i: {j: 0 for j in HOUSES}
@@ -1896,8 +1893,8 @@ class App(tk.Menu):
             logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Planet-Sign distribution "
-                "according to houses' is started."
+                "Calculation of 'House positions of "
+                "planets-signs (Personal)' is started."
             )
             r_planet_sign_dist_acc_to_houses(
                 file=ask_file,
@@ -1917,12 +1914,12 @@ class App(tk.Menu):
                 selection=self.selection
              )
             logging.info(
-                "Calculation of 'Planet-Sign distribution "
-                "according to houses' is completed."
+                "Calculation of 'House positions of "
+                "planets-signs (Personal)' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Planet-Sign distribution "
-                        "according to houses' is completed."
+                message="Calculation of 'House positions of "
+                "planets-signs (Personal)' is completed."
             )
             TBL_PSPS_PRSNL = {
                 sign: {
@@ -1953,8 +1950,8 @@ class App(tk.Menu):
             logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Synastry house positions "
-                "of planets-signs' is started."
+                "Calculation of 'House positions of "
+                "planets-signs (Synastry)' is started."
             )
             r_syn_planet_sign_dist_acc_to_houses(
                 file=ask_file,
@@ -1974,12 +1971,12 @@ class App(tk.Menu):
                 selection=self.selection
              )
             logging.info(
-                "Calculation of 'Synastry house positions "
-                "of planets-signs' is completed."
+                "Calculation of 'House positions "
+                "of planets-signs (Synastry)' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Synastry house "
-                        "positions of planets-signs' is completed."
+                message="Calculation of 'House positions "
+                        "of planets-signs (Synastry)' is completed."
             )
             TBL_PSPS_SYNSTRY = {
                 sign: {
@@ -2058,7 +2055,7 @@ class App(tk.Menu):
     def aspect_dist_acc_to_planets(self):
         self.t_aspect_dist_acc_to_planets = tk.Toplevel()
         self.t_aspect_dist_acc_to_planets.title(
-            "Aspect distribution according to planets"
+            "Aspect distributions of planets"
         )
         self.t_aspect_dist_acc_to_planets.geometry("400x350")
         self.t_aspect_dist_acc_to_planets.resizable(
@@ -2152,7 +2149,7 @@ class App(tk.Menu):
         self.selection = "sign"
         self.t_planet_dist_acc_to_signs = tk.Toplevel()
         self.t_planet_dist_acc_to_signs.title(
-            "Planet Distribution According To Signs"
+            "Sign positions of planets"
         )
         self.t_planet_dist_acc_to_signs.geometry("400x400")
         self.t_planet_dist_acc_to_signs.resizable(
