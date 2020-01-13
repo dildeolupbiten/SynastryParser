@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 import os
 import sys
@@ -912,7 +912,7 @@ def font(name: str = "Arial", bold: bool = False):
 
 
 class Spreadsheet(xlwt.Workbook):
-    size = 3
+    size = 5
     obj = None
 
     def __init__(
@@ -991,19 +991,39 @@ class Spreadsheet(xlwt.Workbook):
         self.size += len(table.keys()) + 3  
         
     def create_tables(
-            self, file: list = [], selected: list = [],
-            modes: list = [], num: int = 0
+            self, files: list = [], selected: list = [],
+            modes: list = [], num: int = 0, file: str = "",
+            number_of_records: int = 0
     ):
-        read = r_aspect_dist_acc_to_planets(file, selected, modes)
+        read = r_aspect_dist_acc_to_planets(files, selected, modes)  
+        self.style.font = font(bold=True)
+        self.sheet.write(
+            r=0, c=0, label="File", style=self.style
+        )     
+        self.style.font = font(bold=False)
+        self.sheet.write_merge(
+            r1=0, c1=1, r2=0, c2=4, 
+            label=f"{os.path.split(file)[-1]}", style=self.style
+        )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=0, c1=0, r2=1, c2=0, label="Mode", style=self.style
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            style=self.style
         )
-        self.sheet.write(r=0, c=1, label="Males", style=self.style)
-        self.sheet.write(r=0, c=2, label="Females", style=self.style)
         self.style.font = font(bold=False)
-        self.sheet.write(r=1, c=1, label=modes[0], style=self.style)
-        self.sheet.write(r=1, c=2, label=modes[1], style=self.style)
+        self.sheet.write(
+            r=1, c=2,
+            label=f"{number_of_records}", style=self.style
+        )
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=2, c1=0, r2=3, c2=0, label="Mode", style=self.style
+        )
+        self.sheet.write(r=2, c=1, label="Males", style=self.style)
+        self.sheet.write(r=2, c=2, label="Females", style=self.style)
+        self.style.font = font(bold=False)
+        self.sheet.write(r=3, c=1, label=modes[0], style=self.style)
+        self.sheet.write(r=3, c=2, label=modes[1], style=self.style)
         try:
             tables = read[0]
             signs = read[1]
@@ -1074,20 +1094,41 @@ class Spreadsheet(xlwt.Workbook):
             table: dict = {}, 
             modes: list = [], 
             selected_obj: list = [],
-            selection: str = ""
+            selection: str = "",
+            file: str = "",
+            number_of_records: int = 0
     ):
+        self.style.font = font(bold=True)
+        self.sheet.write(
+            r=0, c=0, label="File", style=self.style
+        )
+        self.style.font = font(bold=False)
+        self.sheet.write_merge(
+            r1=0, c1=1, r2=0, c2=4, 
+            label=f"{os.path.split(file)[-1]}", style=self.style
+        )
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            style=self.style
+        )
+        self.style.font = font(bold=False)
+        self.sheet.write(
+            r=1, c=2,
+            label=f"{number_of_records}", style=self.style
+        )
         if selection == "sign":
             arg = SIGNS
-            _row = 0
+            _row = 2
         else:
             arg = HOUSES
-            _row = 1
+            _row = 3
             self.style.font = font(bold=True)
             self.sheet.write_merge(
-                r1=0, c1=0, r2=0, c2=1, label="House System", style=self.style)
+                r1=2, c1=0, r2=2, c2=1, label="House System", style=self.style)
             self.style.font = font(bold=False)
             self.sheet.write(
-                r=0, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
+                r=2, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
             )
             self.style.font = font(bold=True)
         self.style.font = font(bold=True)
@@ -1176,24 +1217,45 @@ class Spreadsheet(xlwt.Workbook):
             modes: list = [], 
             selected_obj: list = [],
             selected_sign: list = [],
-            selection: str = ""
-    ):
+            selection: str = "",
+            file: str = "",
+            number_of_records: int = 0            
+    ):    
+        self.style.font = font(bold=True)
+        self.sheet.write(
+            r=0, c=0, label="File", style=self.style
+        )
+        self.style.font = font(bold=False)
+        self.sheet.write_merge(
+            r1=0, c1=1, r2=0, c2=4, 
+            label=f"{os.path.split(file)[-1]}", style=self.style
+        )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=0, c1=0, r2=0, c2=1, label="House System", style=self.style)
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            style=self.style
+        )
         self.style.font = font(bold=False)
         self.sheet.write(
-            r=0, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
+            r=1, c=2,
+            label=f"{number_of_records}", style=self.style
         )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=1, c1=0, r2=2, c2=0, label="Mode", style=self.style
-        )
-        self.sheet.write(r=1, c=1, label="Males", style=self.style)
-        self.sheet.write(r=1, c=2, label="Females", style=self.style)
+            r1=2, c1=0, r2=2, c2=1, label="House System", style=self.style)
         self.style.font = font(bold=False)
-        self.sheet.write(r=2, c=1, label=modes[0], style=self.style)
-        self.sheet.write(r=2, c=2, label=modes[1], style=self.style)
+        self.sheet.write(
+            r=2, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
+        )
+        self.style.font = font(bold=True)
+        self.sheet.write_merge(
+            r1=3, c1=0, r2=4, c2=0, label="Mode", style=self.style
+        )
+        self.sheet.write(r=3, c=1, label="Males", style=self.style)
+        self.sheet.write(r=3, c=2, label="Females", style=self.style)
+        self.style.font = font(bold=False)
+        self.sheet.write(r=4, c=1, label=modes[0], style=self.style)
+        self.sheet.write(r=4, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
         if selection == "synastry planet-sign":
             male_label = f"Males' {selected_obj[0]} "\
@@ -1208,30 +1270,30 @@ class Spreadsheet(xlwt.Workbook):
                            f"({selected_sign[1]})\nin Houses"
             filename = "Personal"
         self.sheet.write_merge(
-            r1=4,
+            r1=6,
             c1=2, 
-            r2=4,
+            r2=6,
             c2=13, 
             label=male_label,
             style=self.style
         )
         self.sheet.write_merge(
-            r1=6,
+            r1=8,
             c1=0, 
-            r2=17,
+            r2=19,
             c2=0, 
             label=female_label,
             style=self.style
         )
         for i, i_ in enumerate(HOUSES):
-            self.sheet.write(r=5, c=i + 2, label=i_, style=self.style)
-            self.sheet.write(r=i + 6, c=1, label=i_, style=self.style)
-        self.sheet.write(r=5, c=14, label="Total", style=self.style)
-        self.sheet.write(r=18, c=1, label="Total", style=self.style)
+            self.sheet.write(r=7, c=i + 2, label=i_, style=self.style)
+            self.sheet.write(r=i + 8, c=1, label=i_, style=self.style)
+        self.sheet.write(r=7, c=14, label="Total", style=self.style)
+        self.sheet.write(r=20, c=1, label="Total", style=self.style)
         self.style.font = font(bold=False)
         column = 2
         for i in HOUSES:
-            row = 6
+            row = 8
             for j in HOUSES:
                 value = table[selected_sign[0]][i][selected_sign[-1]][j]
                 self.sheet.write(
@@ -1244,21 +1306,21 @@ class Spreadsheet(xlwt.Workbook):
             column += 1
         for i in range(12):
             self.sheet.write(
-                18, i + 2,
+                20, i + 2,
                 xlwt.Formula(
-                    f"SUM({self.letters[i]}6:{self.letters[i]}17)"
+                    f"SUM({self.letters[i]}8:{self.letters[i]}19)"
                 ),
                 style=self.style)
             self.sheet.write(
-                i + 6, 14,
+                i + 8, 14,
                 xlwt.Formula(
-                    f"SUM(C{i + 7}:N{i + 7})"
+                    f"SUM(C{i + 9}:N{i + 9})"
                 ),
                 style=self.style)
         self.sheet.write(
-            18, 14,
+            20, 14,
             xlwt.Formula(
-                f"SUM(O7:O18)"
+                f"SUM(O9:O20)"
             ),
             style=self.style)
         self.save(
@@ -1621,8 +1683,6 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif "Person" in i[1]:
-            new_sheet.write(*i[0], i[1], style=self.style)
         elif "Mode" in i[1]:
             new_sheet.write_merge(
                 r1=i[0][0], 
@@ -1632,8 +1692,25 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(19, 230, 15)]:
-            pass
+        elif "csv" in i[1]:
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0], 
+                c1=i[0][1], 
+                c2=i[0][1] + 4,
+                label=i[1], 
+                style=self.style
+            )
+        elif "Number of Records" in i[1]:
+            new_sheet.write_merge(
+                r1=i[0][0], 
+                r2=i[0][0], 
+                c1=i[0][1], 
+                c2=i[0][1] + 1,
+                label=i[1], 
+                style=self.style
+            )
+        elif i[0][0] in [i__ for i__ in range(21, 232, 15)]:
             new_sheet.write_merge(
                 r1=i[0][0], 
                 r2=i[0][0], 
@@ -1642,7 +1719,7 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(21, 246, 15)] \
+        elif i[0][0] in [i__ for i__ in range(23, 248, 15)] \
                 and i[0][1] == 0:
             new_sheet.write_merge(
                 r1=i[0][0], 
@@ -1657,6 +1734,10 @@ class App(tk.Menu):
             new_sheet.write(*i[0], i[1], style=self.style)
             self.style.font = font(bold=True)
         else:
+            if "Natal" in i[1]:                
+                self.style.font = font(bold=False)
+            else:
+                self.style.font = font(bold=True)
             new_sheet.write(*i[0], i[1], style=self.style)
         self.style.font = font(bold=False)
 
@@ -1750,6 +1831,7 @@ class App(tk.Menu):
                 n = time.time()
                 c = 0
                 num = 1
+                logging.info(f"File: {os.path.split(file)[-1]}")
                 logging.info(f"Number of records: {s}")
                 logging.info(f"Selected: {', '.join(self.selected)}")
                 logging.info(
@@ -1770,13 +1852,15 @@ class App(tk.Menu):
                         parted = files[i:i + 400]              
                         part = Spreadsheet()
                         part.create_tables(
-                                file=parted,
+                                files=parted,
                                 num=num,
                                 selected=[
                                     j.replace("-", "_") 
                                     for j in selected
                                 ],
-                                modes=self.modes
+                                modes=self.modes,
+                                file=file,
+                                number_of_records=s
                         )
                         num += 1
                     c += 1
@@ -1795,6 +1879,7 @@ class App(tk.Menu):
                 filetypes=[("CSV File", ".csv")]
             )
             s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"File: {os.path.split(ask_file)[-1]}")
             logging.info(f"Number of records: {s}")
             logging.info(
                 f"Selected Objects: {', '.join(selected_obj)}"
@@ -1808,7 +1893,7 @@ class App(tk.Menu):
                 arg1=selected_obj[0], 
                 arg2=selected_obj[1],
                 table=TBL_SS,
-                index=1
+                index=1,
             )     
             Spreadsheet(
                 arg1=selected_obj[0],
@@ -1817,7 +1902,9 @@ class App(tk.Menu):
                 table=TBL_SS,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="sign"
+                selection="sign",
+                file=ask_file,
+                number_of_records=s
              )
             logging.info(
                 "Calculation of 'Sign positions of planets' is completed."
@@ -1835,6 +1922,7 @@ class App(tk.Menu):
                 filetypes=[("CSV File", ".csv")]
             )
             s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"File: {os.path.split(ask_file)[-1]}")
             logging.info(f"Number of records: {s}")
             logging.info(
                 f"Selected Objects: {', '.join(selected_obj)}"
@@ -1852,7 +1940,7 @@ class App(tk.Menu):
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
                 table=TBL_HH_PRSNL,
-                index=-1
+                index=-1,
             )
             Spreadsheet(
                 arg1=selected_obj[0],
@@ -1861,7 +1949,9 @@ class App(tk.Menu):
                 table=TBL_HH_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="house"
+                selection="house",
+                file=ask_file,
+                number_of_records=s
             )
             logging.info(
                 "Calculation of 'House positions of "
@@ -1881,6 +1971,7 @@ class App(tk.Menu):
                 filetypes=[("CSV File", ".csv")]
             )
             s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"File: {os.path.split(ask_file)[-1]}")
             logging.info(f"Number of records: {s}")
             logging.info(
                 f"Selected Objects: {', '.join(selected_obj)}"
@@ -1906,7 +1997,9 @@ class App(tk.Menu):
                 table=TBL_HH_SYNSTRY,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="synastry_house"
+                selection="synastry_house",
+                file=ask_file,
+                number_of_records=s
             )
             logging.info(
                 "Calculation of 'House positions of "
@@ -1926,6 +2019,7 @@ class App(tk.Menu):
                 filetypes=[("CSV File", ".csv")]
             )
             s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"File: {os.path.split(ask_file)[-1]}")
             logging.info(f"Number of records: {s}")
             logging.info(
                 f"Selected Objects: {', '.join(selected_obj)}"
@@ -1954,7 +2048,9 @@ class App(tk.Menu):
                 modes=self.modes,
                 selected_obj=selected_obj,
                 selected_sign=selected_sign,
-                selection=self.selection
+                selection=self.selection,
+                file=ask_file,
+                number_of_records=s
              )
             logging.info(
                 "Calculation of 'House positions of "
@@ -1983,6 +2079,7 @@ class App(tk.Menu):
                 filetypes=[("CSV File", ".csv")]
             )
             s = len([i for i in open(ask_file, "r").readlines()])
+            logging.info(f"File: {os.path.split(ask_file)[-1]}")
             logging.info(f"Number of records: {s}")
             logging.info(
                 f"Selected Objects: {', '.join(selected_obj)}"
@@ -2011,7 +2108,9 @@ class App(tk.Menu):
                 modes=self.modes,
                 selected_obj=selected_obj,
                 selected_sign=selected_sign,
-                selection=self.selection
+                selection=self.selection,
+                file=ask_file,
+                number_of_records=s
              )
             logging.info(
                 "Calculation of 'House positions "
