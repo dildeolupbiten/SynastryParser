@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 import os
 import sys
@@ -357,6 +357,12 @@ def convert_raw_data():
     print()
     
     
+def rename_csv_file(name):
+    file = f"{name}.csv"
+    length = len([i for i in open(file, "r")])
+    os.rename(file, file.replace("41832", f"{length}"))
+    
+    
 def create_control_group():
     url = URL
     data = [
@@ -394,12 +400,45 @@ def create_control_group():
                                 pass
                     info(s=size, c=count, n=now)
                     count += 2
-            file = f"Random_{FILENAME}.csv"
-            length = len([i for i in open(file, "r")])
-            os.rename(file, file.replace("41832", f"{length}"))
+            rename_csv_file(name=f"Random_{FILENAME}")
             logging.info("Completed creating control group.")
     except FileNotFoundError:
         logging.info(f"{FILENAME}.csv is not found.")
+        
+        
+def split_gauquelin_data():
+    url = URL
+    data = [
+        [int(j) for j in i.decode().split(",")[1:6]][0]
+        for i in urllib.request.urlopen(url)
+    ]
+    males = [data[i] for i in range(0, len(data), 2)]
+    females = [data[i] for i in range(1, len(data), 2)]
+    try:
+        with open(f"{FILENAME}.csv", "r") as case:
+            with open(f"{FILENAME}_Before_1900.csv", "w") as before:
+                with open(f"{FILENAME}_After_1900.csv", "w") as after:
+                    logging.info("Splitting Gauquelin Data...")
+                    case_lines = case.readlines()
+                    size = len(case_lines)
+                    count = 0
+                    now = time.time()
+                    for i in range(len(males)):
+                        if males[i] < 1900:
+                            before.write(f"{case_lines[i * 2]}")
+                            before.write(f"{case_lines[i * 2 + 1]}")
+                            before.flush()
+                        elif males[i] >= 1900:
+                            after.write(f"{case_lines[i * 2]}")
+                            after.write(f"{case_lines[i * 2 + 1]}")
+                            after.flush()
+                        count += 2
+                        info(s=size, c=count, n=now)
+            rename_csv_file(name=f"{FILENAME}_Before_1900")
+            rename_csv_file(name=f"{FILENAME}_After_1900")
+            logging.info("Completed splitting control group.")
+    except FileNotFoundError:
+        logging.info(f"{FILENAME}.csv is not found.")     
     
 
 class Chart:
@@ -1425,6 +1464,12 @@ class App(tk.Menu):
             label=f"Convert Gauquelin Data",
             command=lambda: threading.Thread(
                 target=convert_raw_data
+            ).start()
+        )
+        self.records.add_command(
+            label="Split Gauquelin Data",
+            command=lambda: threading.Thread(
+                target=split_gauquelin_data
             ).start()
         )
         self.records.add_command(
