@@ -828,9 +828,9 @@ def r_planet_sign_dist_acc_to_houses(
                 HSYS
             ).patterns()
             male = synastry_pos(
-                old_male, old_female)[keys.index(arg1)][-1]
+                old_male, old_female)[keys.index(arg1)]
             female = synastry_pos(
-                old_female, old_male)[keys.index(arg2)][-1]
+                old_female, old_male)[keys.index(arg2)]
             TBL_PSPS_PRSNL[male[1]][male[-1]][female[1]][female[-1]] += 1
             count += 2
             info(s=size, c=count, n=now)
@@ -1400,9 +1400,7 @@ class App(tk.Menu):
         self.t_aspect_dist_acc_to_planets = None
         self.t_planet_dist_acc_to_signs = None
         self.t_planet_dist_acc_to_houses = None
-        self.t_syn_planet_dist_acc_to_houses = None
         self.t_planet_sign_dist_acc_to_houses = None
-        self.t_syn_planet_sign_dist_acc_to_houses = None
         self.t_mode = None
         self.t_orb = None
         self.t_hsys = None
@@ -1494,7 +1492,7 @@ class App(tk.Menu):
         self.tables.add_command(
             label="House positions of planets (Synastry)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_syn_planet_dist_acc_to_houses,
+                toplevel=self.t_planet_dist_acc_to_houses,
                 func=lambda: self.planet_dist_acc_to_houses(
                     title="House positions of planets (Synastry)",
                     selection="synastry_house"
@@ -1504,7 +1502,7 @@ class App(tk.Menu):
         self.tables.add_command(
             label="House positions of planets-signs (Synastry)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_syn_planet_sign_dist_acc_to_houses,
+                toplevel=self.t_planet_sign_dist_acc_to_houses,
                 func=lambda: self.planet_sign_dist_acc_to_houses(
                     title="House positions of planets-signs (Synastry)",
                     selection="synastry planet-sign"
