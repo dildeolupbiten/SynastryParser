@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.1"
+__version__ = "1.2.3"
 
 import os
 import sys
@@ -1117,7 +1117,7 @@ class Spreadsheet(xlwt.Workbook):
             r=1, c=2,
             label=f"{number_of_records}", style=self.style
         )
-        if selection == "sign":
+        if selection == "Sign":
             arg = SIGNS
             _row = 2
         else:
@@ -1125,7 +1125,9 @@ class Spreadsheet(xlwt.Workbook):
             _row = 3
             self.style.font = font(bold=True)
             self.sheet.write_merge(
-                r1=2, c1=0, r2=2, c2=1, label="House System", style=self.style)
+                r1=2, c1=0, r2=2, c2=1, label="House System", 
+                style=self.style
+            )
             self.style.font = font(bold=False)
             self.sheet.write(
                 r=2, c=2, label=HOUSE_SYSTEMS[HSYS], style=self.style
@@ -1141,12 +1143,14 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=_row + 1, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=_row + 1, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
-        if selection == "house":
+        if selection == "Personal_House":
             male_label = "Males' " + selected_obj[0] + " in Houses"
             female_label = "Females'\n" + selected_obj[1] + "\nin Houses"
-        elif selection == "synastry_house":
-            male_label = "Males' " + selected_obj[0] + " in Females' Houses"
-            female_label = "Females'\n" + selected_obj[1] + "\nin Males'\nHouses"
+        elif selection == "Synastry_House":
+            male_label = "Males' " + selected_obj[0] + \
+                " in Females' Houses"
+            female_label = "Females'\n" + selected_obj[1] + \
+                "\nin Males'\nHouses"
         else:
             male_label = "Males' " + selected_obj[0] + " in Signs"
             female_label = "Females'\n" + selected_obj[1] + "\nin Signs"
@@ -1207,7 +1211,7 @@ class Spreadsheet(xlwt.Workbook):
             style=self.style
         )
         self.save(
-            f"{selection.capitalize()}_"
+            f"{selection}_"
             f"Male_{self.arg1}_Female_{self.arg2}.xlsx"
         )
 
@@ -1257,7 +1261,7 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=4, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=4, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
-        if selection == "synastry planet-sign":
+        if selection == "Synastry_Planet_Sign":
             male_label = f"Males' {selected_obj[0]} "\
                          f"({selected_sign[0]}) in Females' Houses"
             female_label = f"Females'\n{selected_obj[1]}\n"\
@@ -1582,7 +1586,7 @@ class App(tk.Menu):
                 toplevel=self.t_planet_dist_acc_to_houses,
                 func=lambda: self.planet_dist_acc_to_houses(
                     title="House positions of planets (Personal)",
-                    selection="house"
+                    selection="Personal_House"
                 )
             )
         )
@@ -1592,7 +1596,7 @@ class App(tk.Menu):
                 toplevel=self.t_planet_sign_dist_acc_to_houses,
                 func=lambda: self.planet_sign_dist_acc_to_houses(
                     title="House positions of planets-signs (Personal)",
-                    selection="planet-sign"
+                    selection="Planet_Sign"
                 )
             )
         )
@@ -1602,7 +1606,7 @@ class App(tk.Menu):
                 toplevel=self.t_planet_dist_acc_to_houses,
                 func=lambda: self.planet_dist_acc_to_houses(
                     title="House positions of planets (Synastry)",
-                    selection="synastry_house"
+                    selection="Synastry_House"
                 )
             )
         )
@@ -1612,7 +1616,7 @@ class App(tk.Menu):
                 toplevel=self.t_planet_sign_dist_acc_to_houses,
                 func=lambda: self.planet_sign_dist_acc_to_houses(
                     title="House positions of planets-signs (Synastry)",
-                    selection="synastry planet-sign"
+                    selection="Synastry_Planet_Sign"
                 )
             )
         )
@@ -1875,7 +1879,7 @@ class App(tk.Menu):
             except Exception:
                 traceback.print_exc(file=sys.stdout)
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 and self.selection == "sign":
+                len(selected_sign) == 0 and self.selection == "Sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -1903,7 +1907,7 @@ class App(tk.Menu):
                 table=TBL_SS,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="sign",
+                selection="Sign",
                 file=ask_file,
                 number_of_records=s
              )
@@ -1911,14 +1915,16 @@ class App(tk.Menu):
                 "Calculation of 'Sign positions of planets' is completed."
             )
             msgbox.showinfo(
-                message="Calculation of 'Sign positions of planets' is completed."
+                message="Calculation of 'Sign positions of "
+                        "planets' is completed."
             )
             TBL_SS = {
                 i: {j: 0 for j in SIGNS}
                 for i in SIGNS
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 and self.selection == "house":
+                len(selected_sign) == 0 \
+                and self.selection == "Personal_House":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -1950,7 +1956,7 @@ class App(tk.Menu):
                 table=TBL_HH_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="house",
+                selection="Personal_House",
                 file=ask_file,
                 number_of_records=s
             )
@@ -1967,7 +1973,8 @@ class App(tk.Menu):
                 for i in HOUSES
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 and self.selection == "synastry_house":
+                len(selected_sign) == 0 \
+                and self.selection == "Synastry_House":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -1998,7 +2005,7 @@ class App(tk.Menu):
                 table=TBL_HH_SYNSTRY,
                 modes=self.modes,
                 selected_obj=selected_obj,
-                selection="synastry_house",
+                selection="Synastry_House",
                 file=ask_file,
                 number_of_records=s
             )
@@ -2015,7 +2022,7 @@ class App(tk.Menu):
                 for i in HOUSES
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 2 and self.selection == "planet-sign":
+                len(selected_sign) == 2 and self.selection == "Planet_Sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -2075,7 +2082,7 @@ class App(tk.Menu):
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 2 and \
-                self.selection == "synastry planet-sign":
+                self.selection == "Synastry_Planet_Sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -2289,7 +2296,7 @@ class App(tk.Menu):
             self.selected_sign = []
         
     def planet_dist_acc_to_signs(self):
-        self.selection = "sign"
+        self.selection = "Sign"
         self.t_planet_dist_acc_to_signs = tk.Toplevel()
         self.t_planet_dist_acc_to_signs.title(
             "Sign positions of planets"
