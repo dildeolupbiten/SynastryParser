@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.2"
+__version__ = "1.2.1"
 
 import os
 import sys
@@ -1693,6 +1693,7 @@ class App(tk.Menu):
                 style=self.style
             )
         elif "csv" in i[1]:
+            self.style.font = font(bold=False)
             new_sheet.write_merge(
                 r1=i[0][0], 
                 r2=i[0][0], 
