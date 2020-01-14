@@ -10,7 +10,6 @@ import time
 import logging
 import platform
 import threading
-import traceback
 import subprocess
 import webbrowser
 import tkinter as tk
@@ -1888,270 +1887,285 @@ class App(tk.Menu):
                 )
                 logging.info(f"Merging the separated files...")
                 self.run()
-            except Exception:
-                traceback.print_exc(file=sys.stdout)
+            except:
+                pass
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 0 and self.selection == "Sign":
-            ask_file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-            )
-            s = len([i for i in open(ask_file, "r").readlines()])
-            logging.info(f"File: {os.path.split(ask_file)[-1]}")
-            logging.info(f"Number of records: {s}")
-            logging.info(
-                f"Selected Objects: {', '.join(selected_obj)}"
-            )
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info(
-                "Calculation of 'Sign positions of objects' is started."
-            )
-            r_object_dist_acc_to_signs_or_houses(
-                file=ask_file, 
-                arg1=selected_obj[0], 
-                arg2=selected_obj[1],
-                table=TBL_SS,
-                index=1,
-            )     
-            Spreadsheet(
-                arg1=selected_obj[0],
-                arg2=selected_obj[1]
-             ).w_object_dist_acc_to_signs_or_houses(
-                table=TBL_SS,
-                modes=self.modes,
-                selected_obj=selected_obj,
-                selection="Sign",
-                file=ask_file,
-                number_of_records=s
-             )
-            logging.info(
-                "Calculation of 'Sign positions of objects' is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'Sign positions of "
-                        "objects' is completed."
-            )
-            TBL_SS = {
-                i: {j: 0 for j in SIGNS}
-                for i in SIGNS
-            }
+            try:
+                ask_file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                s = len([i for i in open(ask_file, "r").readlines()])
+                logging.info(f"File: {os.path.split(ask_file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(
+                    f"Selected Objects: {', '.join(selected_obj)}"
+                )
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'Sign positions of objects' is started."
+                )
+                r_object_dist_acc_to_signs_or_houses(
+                    file=ask_file,
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                    table=TBL_SS,
+                    index=1,
+                )
+                Spreadsheet(
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1]
+                 ).w_object_dist_acc_to_signs_or_houses(
+                    table=TBL_SS,
+                    modes=self.modes,
+                    selected_obj=selected_obj,
+                    selection="Sign",
+                    file=ask_file,
+                    number_of_records=s
+                 )
+                logging.info(
+                    "Calculation of 'Sign positions of objects' is completed."
+                )
+                msgbox.showinfo(
+                    message="Calculation of 'Sign positions of "
+                            "objects' is completed."
+                )
+                TBL_SS = {
+                    i: {j: 0 for j in SIGNS}
+                    for i in SIGNS
+                }
+            except:
+                pass
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 0 \
                 and self.selection == "Personal_House":
-            ask_file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-            )
-            s = len([i for i in open(ask_file, "r").readlines()])
-            logging.info(f"File: {os.path.split(ask_file)[-1]}")
-            logging.info(f"Number of records: {s}")
-            logging.info(
-                f"Selected Objects: {', '.join(selected_obj)}"
-            )
-            logging.info(
-                f"House System: {HOUSE_SYSTEMS[HSYS]}"
-            )
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects (Personal)' is started."
-            )
-            r_object_dist_acc_to_signs_or_houses(
-                file=ask_file,
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-                table=TBL_HH_PRSNL,
-                index=-1,
-            )
-            Spreadsheet(
-                arg1=selected_obj[0],
-                arg2=selected_obj[1]
-            ).w_object_dist_acc_to_signs_or_houses(
-                table=TBL_HH_PRSNL,
-                modes=self.modes,
-                selected_obj=selected_obj,
-                selection="Personal_House",
-                file=ask_file,
-                number_of_records=s
-            )
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects (Personal)' is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'House positions of "
-                        "objects (Personal)' is completed."
-            )
-            TBL_HH_PRSNL = {
-                i: {j: 0 for j in HOUSES}
-                for i in HOUSES
-            }
+            try:
+                ask_file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                s = len([i for i in open(ask_file, "r").readlines()])
+                logging.info(f"File: {os.path.split(ask_file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(
+                    f"Selected Objects: {', '.join(selected_obj)}"
+                )
+                logging.info(
+                    f"House System: {HOUSE_SYSTEMS[HSYS]}"
+                )
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects (Personal)' is started."
+                )
+                r_object_dist_acc_to_signs_or_houses(
+                    file=ask_file,
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                    table=TBL_HH_PRSNL,
+                    index=-1,
+                )
+                Spreadsheet(
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1]
+                ).w_object_dist_acc_to_signs_or_houses(
+                    table=TBL_HH_PRSNL,
+                    modes=self.modes,
+                    selected_obj=selected_obj,
+                    selection="Personal_House",
+                    file=ask_file,
+                    number_of_records=s
+                )
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects (Personal)' is completed."
+                )
+                msgbox.showinfo(
+                    message="Calculation of 'House positions of "
+                            "objects (Personal)' is completed."
+                )
+                TBL_HH_PRSNL = {
+                    i: {j: 0 for j in HOUSES}
+                    for i in HOUSES
+                }
+            except:
+                pass
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 0 \
                 and self.selection == "Synastry_House":
-            ask_file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-            )
-            s = len([i for i in open(ask_file, "r").readlines()])
-            logging.info(f"File: {os.path.split(ask_file)[-1]}")
-            logging.info(f"Number of records: {s}")
-            logging.info(
-                f"Selected Objects: {', '.join(selected_obj)}"
-            )
-            logging.info(
-                f"House System: {HOUSE_SYSTEMS[HSYS]}"
-            )
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects (Synastry)' is started."
-            )
-            r_syn_object_dist_acc_to_signs_or_houses(
-                file=ask_file,
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-                table=TBL_HH_SYNSTRY,
-            )
-            Spreadsheet(
-                arg1=selected_obj[0],
-                arg2=selected_obj[1]
-            ).w_object_dist_acc_to_signs_or_houses(
-                table=TBL_HH_SYNSTRY,
-                modes=self.modes,
-                selected_obj=selected_obj,
-                selection="Synastry_House",
-                file=ask_file,
-                number_of_records=s
-            )
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects (Synastry)' is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'House positions of "
-                        "objects (Synastry)' is completed."
-            )
-            TBL_HH_SYNSTRY = {
-                i: {j: 0 for j in HOUSES}
-                for i in HOUSES
-            }
+            try:
+                ask_file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                s = len([i for i in open(ask_file, "r").readlines()])
+                logging.info(f"File: {os.path.split(ask_file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(
+                    f"Selected Objects: {', '.join(selected_obj)}"
+                )
+                logging.info(
+                    f"House System: {HOUSE_SYSTEMS[HSYS]}"
+                )
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects (Synastry)' is started."
+                )
+                r_syn_object_dist_acc_to_signs_or_houses(
+                    file=ask_file,
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                    table=TBL_HH_SYNSTRY,
+                )
+                Spreadsheet(
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1]
+                ).w_object_dist_acc_to_signs_or_houses(
+                    table=TBL_HH_SYNSTRY,
+                    modes=self.modes,
+                    selected_obj=selected_obj,
+                    selection="Synastry_House",
+                    file=ask_file,
+                    number_of_records=s
+                )
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects (Synastry)' is completed."
+                )
+                msgbox.showinfo(
+                    message="Calculation of 'House positions of "
+                            "objects (Synastry)' is completed."
+                )
+                TBL_HH_SYNSTRY = {
+                    i: {j: 0 for j in HOUSES}
+                    for i in HOUSES
+                }
+            except:
+                pass
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 2 and self.selection == "Object_Sign":
-            ask_file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-            )
-            s = len([i for i in open(ask_file, "r").readlines()])
-            logging.info(f"File: {os.path.split(ask_file)[-1]}")
-            logging.info(f"Number of records: {s}")
-            logging.info(
-                f"Selected Objects: {', '.join(selected_obj)}"
-            )
-            logging.info(
-                f"Selected Signs: {', '.join(selected_sign)}"
-            )
-            logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects-signs (Personal)' is started."
-            )
-            r_object_sign_dist_acc_to_houses(
-                file=ask_file,
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-            )
-            Spreadsheet(
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-                arg3=selected_sign[0],
-                arg4=selected_sign[1]
-             ).w_object_sign_dist_acc_to_houses(
-                table=TBL_PSPS_PRSNL,
-                modes=self.modes,
-                selected_obj=selected_obj,
-                selected_sign=selected_sign,
-                selection=self.selection,
-                file=ask_file,
-                number_of_records=s
-             )
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects-signs (Personal)' is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'House positions of "
-                "objects-signs (Personal)' is completed."
-            )
-            TBL_PSPS_PRSNL = {
-                sign: {
-                    house: {
-                        _sign: {
-                            _house: 0 for _house in HOUSES
+            try:
+                ask_file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                s = len([i for i in open(ask_file, "r").readlines()])
+                logging.info(f"File: {os.path.split(ask_file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(
+                    f"Selected Objects: {', '.join(selected_obj)}"
+                )
+                logging.info(
+                    f"Selected Signs: {', '.join(selected_sign)}"
+                )
+                logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects-signs (Personal)' is started."
+                )
+                r_object_sign_dist_acc_to_houses(
+                    file=ask_file,
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                )
+                Spreadsheet(
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                    arg3=selected_sign[0],
+                    arg4=selected_sign[1]
+                 ).w_object_sign_dist_acc_to_houses(
+                    table=TBL_PSPS_PRSNL,
+                    modes=self.modes,
+                    selected_obj=selected_obj,
+                    selected_sign=selected_sign,
+                    selection=self.selection,
+                    file=ask_file,
+                    number_of_records=s
+                 )
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects-signs (Personal)' is completed."
+                )
+                msgbox.showinfo(
+                    message="Calculation of 'House positions of "
+                    "objects-signs (Personal)' is completed."
+                )
+                TBL_PSPS_PRSNL = {
+                    sign: {
+                        house: {
+                            _sign: {
+                                _house: 0 for _house in HOUSES
+                            }
+                            for _sign in SIGNS
                         }
-                        for _sign in SIGNS
+                        for house in HOUSES
                     }
-                    for house in HOUSES
+                    for sign in SIGNS
                 }
-                for sign in SIGNS
-            }
+            except:
+                pass
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 2 and \
                 self.selection == "Synastry_Object_Sign":
-            ask_file = filedialog.askopenfilename(
-                filetypes=[("CSV File", ".csv")]
-            )
-            s = len([i for i in open(ask_file, "r").readlines()])
-            logging.info(f"File: {os.path.split(ask_file)[-1]}")
-            logging.info(f"Number of records: {s}")
-            logging.info(
-                f"Selected Objects: {', '.join(selected_obj)}"
-            )
-            logging.info(
-                f"Selected Signs: {', '.join(selected_sign)}"
-            )
-            logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
-            logging.info(f"Mode: {', '.join(self.modes)}")
-            logging.info(
-                "Calculation of 'House positions of "
-                "objects-signs (Synastry)' is started."
-            )
-            r_syn_object_sign_dist_acc_to_houses(
-                file=ask_file,
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-            )
-            Spreadsheet(
-                arg1=selected_obj[0],
-                arg2=selected_obj[1],
-                arg3=selected_sign[0],
-                arg4=selected_sign[1]
-             ).w_object_sign_dist_acc_to_houses(
-                table=TBL_PSPS_SYNSTRY,
-                modes=self.modes,
-                selected_obj=selected_obj,
-                selected_sign=selected_sign,
-                selection=self.selection,
-                file=ask_file,
-                number_of_records=s
-             )
-            logging.info(
-                "Calculation of 'House positions "
-                "of objects-signs (Synastry)' is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'House positions "
-                        "of objects-signs (Synastry)' is completed."
-            )
-            TBL_PSPS_SYNSTRY = {
-                sign: {
-                    house: {
-                        _sign: {
-                            _house: 0 for _house in HOUSES
+            try:
+                ask_file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                s = len([i for i in open(ask_file, "r").readlines()])
+                logging.info(f"File: {os.path.split(ask_file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(
+                    f"Selected Objects: {', '.join(selected_obj)}"
+                )
+                logging.info(
+                    f"Selected Signs: {', '.join(selected_sign)}"
+                )
+                logging.info(f"House System: {HOUSE_SYSTEMS[HSYS]}")
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'House positions of "
+                    "objects-signs (Synastry)' is started."
+                )
+                r_syn_object_sign_dist_acc_to_houses(
+                    file=ask_file,
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                )
+                Spreadsheet(
+                    arg1=selected_obj[0],
+                    arg2=selected_obj[1],
+                    arg3=selected_sign[0],
+                    arg4=selected_sign[1]
+                 ).w_object_sign_dist_acc_to_houses(
+                    table=TBL_PSPS_SYNSTRY,
+                    modes=self.modes,
+                    selected_obj=selected_obj,
+                    selected_sign=selected_sign,
+                    selection=self.selection,
+                    file=ask_file,
+                    number_of_records=s
+                 )
+                logging.info(
+                    "Calculation of 'House positions "
+                    "of objects-signs (Synastry)' is completed."
+                )
+                msgbox.showinfo(
+                    message="Calculation of 'House positions "
+                            "of objects-signs (Synastry)' is completed."
+                )
+                TBL_PSPS_SYNSTRY = {
+                    sign: {
+                        house: {
+                            _sign: {
+                                _house: 0 for _house in HOUSES
+                            }
+                            for _sign in SIGNS
                         }
-                        for _sign in SIGNS
+                        for house in HOUSES
                     }
-                    for house in HOUSES
+                    for sign in SIGNS
                 }
-                for sign in SIGNS
-            }
+            except:
+                pass
         else:
             msgbox.showinfo(
                 message="Please select one table to be calculated."
