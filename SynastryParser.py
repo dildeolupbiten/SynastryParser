@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 
 import os
 import sys
@@ -174,6 +174,8 @@ OBJECTS = [
     "True",
     "Chiron",
     "Juno",
+    "Asc",
+    "MC"
 ]
 ASPECTS = [
     "Conjunction",
@@ -539,6 +541,11 @@ class Chart:
                 f"H{house}"
             ]
             planet_positions.append(planet_info)
+        asc = house_positions[0] + ["H1"]
+        asc[0] = "Asc"
+        mc = house_positions[9] + ["H10"]
+        mc[0] = "MC"
+        planet_positions.extend([asc, mc])
         return planet_positions, house_positions
            
        
@@ -731,7 +738,7 @@ def count_aspects_2(split_list: list = [], selected: list = []):
     return final
     
     
-def r_aspect_dist_acc_to_planets(
+def r_aspect_dist_acc_to_objects(
         file: list = [],
         selected: list = [],
         modes: list = []
@@ -781,13 +788,14 @@ def synastry_pos(chart1: list = [], chart2: list = []):
     return chart1[0]
 
 
-def r_syn_planet_dist_acc_to_signs_or_houses(
+def r_syn_object_dist_acc_to_signs_or_houses(
         file: str = "",
         arg1: str = "",
         arg2: str = "",
         table: dict = {},
 ):
     keys = list(Chart.PLANET_DICT.keys())
+    keys.extend(["Asc", "MC"])
     with open(file, "r") as f:
         readlines = f.readlines()
         size = len(readlines)
@@ -818,7 +826,7 @@ def r_syn_planet_dist_acc_to_signs_or_houses(
         print()
 
         
-def r_planet_dist_acc_to_signs_or_houses(
+def r_object_dist_acc_to_signs_or_houses(
         file: str = "",
         arg1: str = "",
         arg2: str = "",
@@ -826,6 +834,7 @@ def r_planet_dist_acc_to_signs_or_houses(
         index: int = 0
 ):
     keys = list(Chart.PLANET_DICT.keys())
+    keys.extend(["Asc", "MC"])
     with open(file, "r") as f:
         readlines = f.readlines()
         size = len(readlines)
@@ -846,12 +855,13 @@ def r_planet_dist_acc_to_signs_or_houses(
         print()
 
 
-def r_planet_sign_dist_acc_to_houses(
+def r_object_sign_dist_acc_to_houses(
         file: str = "",
         arg1: str = "",
         arg2: str = "",
 ):
     keys = list(Chart.PLANET_DICT.keys())
+    keys.extend(["Asc", "MC"])
     with open(file, "r") as f:
         readlines = f.readlines()
         size = len(readlines)
@@ -876,12 +886,13 @@ def r_planet_sign_dist_acc_to_houses(
         print()
 
 
-def r_syn_planet_sign_dist_acc_to_houses(
+def r_syn_object_sign_dist_acc_to_houses(
         file: str = "",
         arg1: str = "",
         arg2: str = "",
 ):
     keys = list(Chart.PLANET_DICT.keys())
+    keys.extend(["Asc", "MC"])
     with open(file, "r") as f:
         readlines = f.readlines()
         size = len(readlines)
@@ -937,7 +948,9 @@ class Spreadsheet(xlwt.Workbook):
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
 
-    def w_aspect_dist_acc_to_planets(self, table: dict = {}, aspect: str = ""):
+    def w_aspect_dist_acc_to_objects(
+            self, table: dict = {}, aspect: str = ""
+    ):
         temporary = {}
         transpose = np.transpose([i for i in table.values()])
         arr = [[int(j) for j in list(i)] for i in transpose]
@@ -995,7 +1008,7 @@ class Spreadsheet(xlwt.Workbook):
             modes: list = [], num: int = 0, file: str = "",
             number_of_records: int = 0
     ):
-        read = r_aspect_dist_acc_to_planets(files, selected, modes)  
+        read = r_aspect_dist_acc_to_objects(files, selected, modes)  
         self.style.font = font(bold=True)
         self.sheet.write(
             r=0, c=0, label="File", style=self.style
@@ -1031,7 +1044,7 @@ class Spreadsheet(xlwt.Workbook):
                 count = 0
                 for index, aspect in enumerate(ASPECTS):
                     if aspect in selected:
-                        self.w_aspect_dist_acc_to_planets(
+                        self.w_aspect_dist_acc_to_objects(
                             tables[selected.index(aspect)],
                             aspect,
                         )
@@ -1089,7 +1102,7 @@ class Spreadsheet(xlwt.Workbook):
         except TypeError:
             pass
             
-    def w_planet_dist_acc_to_signs_or_houses(
+    def w_object_dist_acc_to_signs_or_houses(
             self, 
             table: dict = {}, 
             modes: list = [], 
@@ -1215,7 +1228,7 @@ class Spreadsheet(xlwt.Workbook):
             f"Male_{self.arg1}_Female_{self.arg2}.xlsx"
         )
 
-    def w_planet_sign_dist_acc_to_houses(
+    def w_object_sign_dist_acc_to_houses(
             self, 
             table: dict = {}, 
             modes: list = [], 
@@ -1261,7 +1274,7 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=4, c=1, label=modes[0], style=self.style)
         self.sheet.write(r=4, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
-        if selection == "Synastry_Planet_Sign":
+        if selection == "Synastry_Object_Sign":
             male_label = f"Males' {selected_obj[0]} "\
                          f"({selected_sign[0]}) in Females' Houses"
             female_label = f"Females'\n{selected_obj[1]}\n"\
@@ -1502,10 +1515,10 @@ class App(tk.Menu):
     def __init__(self, master=None):
         tk.Menu.__init__(self, master)
         self.master.configure(menu=self)
-        self.t_aspect_dist_acc_to_planets = None
-        self.t_planet_dist_acc_to_signs = None
-        self.t_planet_dist_acc_to_houses = None
-        self.t_planet_sign_dist_acc_to_houses = None
+        self.t_aspect_dist_acc_to_objects = None
+        self.t_object_dist_acc_to_signs = None
+        self.t_object_dist_acc_to_houses = None
+        self.t_object_sign_dist_acc_to_houses = None
         self.t_mode = None
         self.t_orb = None
         self.t_hsys = None
@@ -1567,56 +1580,56 @@ class App(tk.Menu):
             command=age_differences_frequency
         )
         self.tables.add_command(
-            label="Aspect distributions of planets",
+            label="Aspect distributions of objects",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_aspect_dist_acc_to_planets,
-                func=self.aspect_dist_acc_to_planets
+                toplevel=self.t_aspect_dist_acc_to_objects,
+                func=self.aspect_dist_acc_to_objects
             )
         )
         self.tables.add_command(
-            label="Sign positions of planets",
+            label="Sign positions of objects",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_dist_acc_to_signs,
-                func=self.planet_dist_acc_to_signs
+                toplevel=self.t_object_dist_acc_to_signs,
+                func=self.object_dist_acc_to_signs
             )
         )
         self.tables.add_command(
-            label="House positions of planets (Personal)",
+            label="House positions of objects (Personal)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_dist_acc_to_houses,
-                func=lambda: self.planet_dist_acc_to_houses(
-                    title="House positions of planets (Personal)",
+                toplevel=self.t_object_dist_acc_to_houses,
+                func=lambda: self.object_dist_acc_to_houses(
+                    title="House positions of objects (Personal)",
                     selection="Personal_House"
                 )
             )
         )
         self.tables.add_command(
-            label="House positions of planets-signs (Personal)",
+            label="House positions of objects-signs (Personal)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_sign_dist_acc_to_houses,
-                func=lambda: self.planet_sign_dist_acc_to_houses(
-                    title="House positions of planets-signs (Personal)",
-                    selection="Planet_Sign"
+                toplevel=self.t_object_sign_dist_acc_to_houses,
+                func=lambda: self.object_sign_dist_acc_to_houses(
+                    title="House positions of objects-signs (Personal)",
+                    selection="Object_Sign"
                 )
             )
         )
         self.tables.add_command(
-            label="House positions of planets (Synastry)",
+            label="House positions of objects (Synastry)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_dist_acc_to_houses,
-                func=lambda: self.planet_dist_acc_to_houses(
-                    title="House positions of planets (Synastry)",
+                toplevel=self.t_object_dist_acc_to_houses,
+                func=lambda: self.object_dist_acc_to_houses(
+                    title="House positions of objects (Synastry)",
                     selection="Synastry_House"
                 )
             )
         )
         self.tables.add_command(
-            label="House positions of planets-signs (Synastry)",
+            label="House positions of objects-signs (Synastry)",
             command=lambda: self.open_toplevel(
-                toplevel=self.t_planet_sign_dist_acc_to_houses,
-                func=lambda: self.planet_sign_dist_acc_to_houses(
-                    title="House positions of planets-signs (Synastry)",
-                    selection="Synastry_Planet_Sign"
+                toplevel=self.t_object_sign_dist_acc_to_houses,
+                func=lambda: self.object_sign_dist_acc_to_houses(
+                    title="House positions of objects-signs (Synastry)",
+                    selection="Synastry_Object_Sign"
                 )
             )
         )
@@ -1683,7 +1696,7 @@ class App(tk.Menu):
                 r1=i[0][0], 
                 r2=i[0][0], 
                 c1=i[0][1], 
-                c2=i[0][1] + 13,
+                c2=i[0][1] + 15,
                 label=i[1], 
                 style=self.style
             )
@@ -1715,7 +1728,7 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(21, 232, 15)]:
+        elif i[0][0] in [i__ for i__ in range(23, 232, 15)]:
             new_sheet.write_merge(
                 r1=i[0][0], 
                 r2=i[0][0], 
@@ -1724,7 +1737,7 @@ class App(tk.Menu):
                 label=i[1], 
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(23, 248, 15)] \
+        elif i[0][0] in [i__ for i__ in range(25, 250, 15)] \
                 and i[0][1] == 0:
             new_sheet.write_merge(
                 r1=i[0][0], 
@@ -1796,12 +1809,12 @@ class App(tk.Menu):
             os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
             self.master.update()
             logging.info(
-                "Calculation of 'Aspect distributions of planets' "
+                "Calculation of 'Aspect distributions of objects' "
                 "is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'Aspect distributions of "
-                        "planets' calculation completed."
+                        "objects' calculation completed."
             )
 
     def start(
@@ -1847,7 +1860,7 @@ class App(tk.Menu):
                 logging.info(f"Mode: {', '.join(self.modes)}")
                 logging.info(
                     "Calculation of 'Aspect distributions of "
-                    "planets' is started."
+                    "objects' is started."
                 )
                 logging.info(
                     f"Separating {len(files)} records into files..."
@@ -1891,9 +1904,9 @@ class App(tk.Menu):
             )
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
-                "Calculation of 'Sign positions of planets' is started."
+                "Calculation of 'Sign positions of objects' is started."
             )
-            r_planet_dist_acc_to_signs_or_houses(
+            r_object_dist_acc_to_signs_or_houses(
                 file=ask_file, 
                 arg1=selected_obj[0], 
                 arg2=selected_obj[1],
@@ -1903,7 +1916,7 @@ class App(tk.Menu):
             Spreadsheet(
                 arg1=selected_obj[0],
                 arg2=selected_obj[1]
-             ).w_planet_dist_acc_to_signs_or_houses(
+             ).w_object_dist_acc_to_signs_or_houses(
                 table=TBL_SS,
                 modes=self.modes,
                 selected_obj=selected_obj,
@@ -1912,11 +1925,11 @@ class App(tk.Menu):
                 number_of_records=s
              )
             logging.info(
-                "Calculation of 'Sign positions of planets' is completed."
+                "Calculation of 'Sign positions of objects' is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'Sign positions of "
-                        "planets' is completed."
+                        "objects' is completed."
             )
             TBL_SS = {
                 i: {j: 0 for j in SIGNS}
@@ -1940,9 +1953,9 @@ class App(tk.Menu):
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
                 "Calculation of 'House positions of "
-                "planets (Personal)' is started."
+                "objects (Personal)' is started."
             )
-            r_planet_dist_acc_to_signs_or_houses(
+            r_object_dist_acc_to_signs_or_houses(
                 file=ask_file,
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
@@ -1952,7 +1965,7 @@ class App(tk.Menu):
             Spreadsheet(
                 arg1=selected_obj[0],
                 arg2=selected_obj[1]
-            ).w_planet_dist_acc_to_signs_or_houses(
+            ).w_object_dist_acc_to_signs_or_houses(
                 table=TBL_HH_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
@@ -1962,11 +1975,11 @@ class App(tk.Menu):
             )
             logging.info(
                 "Calculation of 'House positions of "
-                "planets (Personal)' is completed."
+                "objects (Personal)' is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'House positions of "
-                        "planets (Personal)' is completed."
+                        "objects (Personal)' is completed."
             )
             TBL_HH_PRSNL = {
                 i: {j: 0 for j in HOUSES}
@@ -1990,9 +2003,9 @@ class App(tk.Menu):
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
                 "Calculation of 'House positions of "
-                "planets (Synastry)' is started."
+                "objects (Synastry)' is started."
             )
-            r_syn_planet_dist_acc_to_signs_or_houses(
+            r_syn_object_dist_acc_to_signs_or_houses(
                 file=ask_file,
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
@@ -2001,7 +2014,7 @@ class App(tk.Menu):
             Spreadsheet(
                 arg1=selected_obj[0],
                 arg2=selected_obj[1]
-            ).w_planet_dist_acc_to_signs_or_houses(
+            ).w_object_dist_acc_to_signs_or_houses(
                 table=TBL_HH_SYNSTRY,
                 modes=self.modes,
                 selected_obj=selected_obj,
@@ -2011,18 +2024,18 @@ class App(tk.Menu):
             )
             logging.info(
                 "Calculation of 'House positions of "
-                "planets (Synastry)' is completed."
+                "objects (Synastry)' is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'House positions of "
-                        "planets (Synastry)' is completed."
+                        "objects (Synastry)' is completed."
             )
             TBL_HH_SYNSTRY = {
                 i: {j: 0 for j in HOUSES}
                 for i in HOUSES
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 2 and self.selection == "Planet_Sign":
+                len(selected_sign) == 2 and self.selection == "Object_Sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -2039,9 +2052,9 @@ class App(tk.Menu):
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
                 "Calculation of 'House positions of "
-                "planets-signs (Personal)' is started."
+                "objects-signs (Personal)' is started."
             )
-            r_planet_sign_dist_acc_to_houses(
+            r_object_sign_dist_acc_to_houses(
                 file=ask_file,
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
@@ -2051,7 +2064,7 @@ class App(tk.Menu):
                 arg2=selected_obj[1],
                 arg3=selected_sign[0],
                 arg4=selected_sign[1]
-             ).w_planet_sign_dist_acc_to_houses(
+             ).w_object_sign_dist_acc_to_houses(
                 table=TBL_PSPS_PRSNL,
                 modes=self.modes,
                 selected_obj=selected_obj,
@@ -2062,11 +2075,11 @@ class App(tk.Menu):
              )
             logging.info(
                 "Calculation of 'House positions of "
-                "planets-signs (Personal)' is completed."
+                "objects-signs (Personal)' is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'House positions of "
-                "planets-signs (Personal)' is completed."
+                "objects-signs (Personal)' is completed."
             )
             TBL_PSPS_PRSNL = {
                 sign: {
@@ -2082,7 +2095,7 @@ class App(tk.Menu):
             }
         elif len(selected) == 0 and len(selected_obj) == 2 and \
                 len(selected_sign) == 2 and \
-                self.selection == "Synastry_Planet_Sign":
+                self.selection == "Synastry_Object_Sign":
             ask_file = filedialog.askopenfilename(
                 filetypes=[("CSV File", ".csv")]
             )
@@ -2099,9 +2112,9 @@ class App(tk.Menu):
             logging.info(f"Mode: {', '.join(self.modes)}")
             logging.info(
                 "Calculation of 'House positions of "
-                "planets-signs (Synastry)' is started."
+                "objects-signs (Synastry)' is started."
             )
-            r_syn_planet_sign_dist_acc_to_houses(
+            r_syn_object_sign_dist_acc_to_houses(
                 file=ask_file,
                 arg1=selected_obj[0],
                 arg2=selected_obj[1],
@@ -2111,7 +2124,7 @@ class App(tk.Menu):
                 arg2=selected_obj[1],
                 arg3=selected_sign[0],
                 arg4=selected_sign[1]
-             ).w_planet_sign_dist_acc_to_houses(
+             ).w_object_sign_dist_acc_to_houses(
                 table=TBL_PSPS_SYNSTRY,
                 modes=self.modes,
                 selected_obj=selected_obj,
@@ -2122,11 +2135,11 @@ class App(tk.Menu):
              )
             logging.info(
                 "Calculation of 'House positions "
-                "of planets-signs (Synastry)' is completed."
+                "of objects-signs (Synastry)' is completed."
             )
             msgbox.showinfo(
                 message="Calculation of 'House positions "
-                        "of planets-signs (Synastry)' is completed."
+                        "of objects-signs (Synastry)' is completed."
             )
             TBL_PSPS_SYNSTRY = {
                 sign: {
@@ -2194,37 +2207,37 @@ class App(tk.Menu):
                 self.selected.append(i)
         if len(self.selected) != 2:
             msgbox.showinfo(
-                message="Please select one aspect and one planet."
+                message="Please select one aspect and one object."
             )
         else:
-            self.t_aspect_dist_acc_to_planets.destroy()
-            self.t_aspect_dist_acc_to_planets = None
+            self.t_aspect_dist_acc_to_objects.destroy()
+            self.t_aspect_dist_acc_to_objects = None
             self.selected_obj = []
             self.selected_sign = []
 
-    def aspect_dist_acc_to_planets(self):
-        self.t_aspect_dist_acc_to_planets = tk.Toplevel()
-        self.t_aspect_dist_acc_to_planets.title(
-            "Aspect distributions of planets"
+    def aspect_dist_acc_to_objects(self):
+        self.t_aspect_dist_acc_to_objects = tk.Toplevel()
+        self.t_aspect_dist_acc_to_objects.title(
+            "Aspect distributions of objects"
         )
-        self.t_aspect_dist_acc_to_planets.geometry("400x350")
-        self.t_aspect_dist_acc_to_planets.resizable(
+        self.t_aspect_dist_acc_to_objects.geometry("400x420")
+        self.t_aspect_dist_acc_to_objects.resizable(
             width=False, height=False
         )
-        main_frame = tk.Frame(master=self.t_aspect_dist_acc_to_planets)
+        main_frame = tk.Frame(master=self.t_aspect_dist_acc_to_objects)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
             bd=1, 
-            relief="sunken"
+            relief="sunken",
         )
-        left_frame.pack(side="left")
+        left_frame.pack(side="left", fill="both")
         right_frame = tk.Frame(
             master=main_frame,
             bd=1,
             relief="sunken"
         )
-        right_frame.pack(side="left")
+        right_frame.pack(side="left", fill="both")
         left_frame_label = tk.Label(
             master=left_frame,
             text="Select Aspect Types",
@@ -2233,7 +2246,7 @@ class App(tk.Menu):
         left_frame_label.pack()
         right_frame_label = tk.Label(
             master=right_frame,
-            text="Select Planets",
+            text="Select Objects",
             fg="red"
         )
         right_frame_label.pack()
@@ -2267,7 +2280,7 @@ class App(tk.Menu):
         fill_left = tk.Frame(left_cb_frame, height=46)
         fill_left.grid(row=12, column=0)
         apply_button = tk.Button(
-            master=self.t_aspect_dist_acc_to_planets,
+            master=self.t_aspect_dist_acc_to_objects,
             text="Apply",
             command=lambda: self.select_tables(checkbuttons)
         )
@@ -2290,22 +2303,22 @@ class App(tk.Menu):
                 message="Please select at least two objects."
             )
         else:
-            self.t_planet_dist_acc_to_signs.destroy()
-            self.t_planet_dist_acc_to_signs = None
+            self.t_object_dist_acc_to_signs.destroy()
+            self.t_object_dist_acc_to_signs = None
             self.selected = []
             self.selected_sign = []
         
-    def planet_dist_acc_to_signs(self):
+    def object_dist_acc_to_signs(self):
         self.selection = "Sign"
-        self.t_planet_dist_acc_to_signs = tk.Toplevel()
-        self.t_planet_dist_acc_to_signs.title(
-            "Sign positions of planets"
+        self.t_object_dist_acc_to_signs = tk.Toplevel()
+        self.t_object_dist_acc_to_signs.title(
+            "Sign positions of objects"
         )
-        self.t_planet_dist_acc_to_signs.geometry("400x400")
-        self.t_planet_dist_acc_to_signs.resizable(
+        self.t_object_dist_acc_to_signs.geometry("400x420")
+        self.t_object_dist_acc_to_signs.resizable(
             width=False, height=False
         )
-        main_frame = tk.Frame(master=self.t_planet_dist_acc_to_signs)
+        main_frame = tk.Frame(master=self.t_object_dist_acc_to_signs)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
@@ -2315,7 +2328,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet\nfor males",
+            text="Select an object\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -2329,7 +2342,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet\nfor females",
+            text="Select an object\nfor females",
             fg="red"
         )
         label_right.pack()
@@ -2355,7 +2368,7 @@ class App(tk.Menu):
                 array=OBJECTS
             )
         apply_button = tk.Button(
-            master=self.t_planet_dist_acc_to_signs,
+            master=self.t_object_dist_acc_to_signs,
             text="Apply",
             command=lambda: self.select_objects(
                 checkbuttons1,
@@ -2381,20 +2394,20 @@ class App(tk.Menu):
                 message="Please select at least two objects."
             )
         else:
-            self.t_planet_dist_acc_to_houses.destroy()
-            self.t_planet_dist_acc_to_houses = None
+            self.t_object_dist_acc_to_houses.destroy()
+            self.t_object_dist_acc_to_houses = None
             self.selected = []
             self.selected_sign = []
 
-    def planet_dist_acc_to_houses(self, title, selection):
+    def object_dist_acc_to_houses(self, title, selection):
         self.selection = selection
-        self.t_planet_dist_acc_to_houses = tk.Toplevel()
-        self.t_planet_dist_acc_to_houses.title(title)
-        self.t_planet_dist_acc_to_houses.geometry("400x400")
-        self.t_planet_dist_acc_to_houses.resizable(
+        self.t_object_dist_acc_to_houses = tk.Toplevel()
+        self.t_object_dist_acc_to_houses.title(title)
+        self.t_object_dist_acc_to_houses.geometry("400x420")
+        self.t_object_dist_acc_to_houses.resizable(
             width=False, height=False
         )
-        main_frame = tk.Frame(master=self.t_planet_dist_acc_to_houses)
+        main_frame = tk.Frame(master=self.t_object_dist_acc_to_houses)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame,
@@ -2404,7 +2417,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet\nfor males",
+            text="Select an object\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -2418,7 +2431,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet\nfor females",
+            text="Select an object\nfor females",
             fg="red"
         )
         label_right.pack()
@@ -2444,7 +2457,7 @@ class App(tk.Menu):
                 array=OBJECTS
             )
         apply_button = tk.Button(
-            master=self.t_planet_dist_acc_to_houses,
+            master=self.t_object_dist_acc_to_houses,
             text="Apply",
             command=lambda: self.select_houses(
                 checkbuttons1,
@@ -2480,19 +2493,19 @@ class App(tk.Menu):
                         "two signs."
             )
         else:
-            self.t_planet_sign_dist_acc_to_houses.destroy()
-            self.t_planet_sign_dist_acc_to_houses = None
+            self.t_object_sign_dist_acc_to_houses.destroy()
+            self.t_object_sign_dist_acc_to_houses = None
             self.selected = []
         
-    def planet_sign_dist_acc_to_houses(self, title, selection):
+    def object_sign_dist_acc_to_houses(self, title, selection):
         self.selection = selection
-        self.t_planet_sign_dist_acc_to_houses = tk.Toplevel()
-        self.t_planet_sign_dist_acc_to_houses.title(title)
-        self.t_planet_sign_dist_acc_to_houses.geometry("400x400")
-        self.t_planet_sign_dist_acc_to_houses.resizable(
+        self.t_object_sign_dist_acc_to_houses = tk.Toplevel()
+        self.t_object_sign_dist_acc_to_houses.title(title)
+        self.t_object_sign_dist_acc_to_houses.geometry("400x420")
+        self.t_object_sign_dist_acc_to_houses.resizable(
             width=False, height=False
         )
-        main_frame = tk.Frame(master=self.t_planet_sign_dist_acc_to_houses)
+        main_frame = tk.Frame(master=self.t_object_sign_dist_acc_to_houses)
         main_frame.pack()
         left_frame = tk.Frame(
             master=main_frame, 
@@ -2502,7 +2515,7 @@ class App(tk.Menu):
         left_frame.pack(side="left")
         label_left = tk.Label(
             master=left_frame,
-            text="Select a planet and a sign\nfor males",
+            text="Select an object and a sign\nfor males",
             fg="red"
         )
         label_left.pack()
@@ -2516,7 +2529,7 @@ class App(tk.Menu):
         right_frame.pack(side="left")
         label_right = tk.Label(
             master=right_frame,
-            text="Select a planet and a sign \nfor females",
+            text="Select an object and a sign \nfor females",
             fg="red"
         )
         label_right.pack()
@@ -2561,7 +2574,7 @@ class App(tk.Menu):
                 array=SIGNS
             )
         apply_button = tk.Button(
-            master=self.t_planet_sign_dist_acc_to_houses,
+            master=self.t_object_sign_dist_acc_to_houses,
             text="Apply",
             command=lambda: self.select_objects_signs(
                 checkbuttons1, 
@@ -2847,9 +2860,11 @@ class App(tk.Menu):
             )
         developed_by, _developed_by = "Developed By:", \
                                       "Tanberk Celalettin Kutlu"
+        thanks_to, _thanks_to = "Thanks To:", \
+                                "Flavia Alonzo, http://cura.free.fr"
         contact, _contact = "Contact:", "tckutlu@gmail.com"
         github, _github = "GitHub:", \
-            "https://github.com/dildeolupbitenSynastryParser"
+            "https://github.com/dildeolupbiten/SynastryParser"
         tframe1 = tk.Frame(master=tl, bd="2", relief="groove")
         tframe1.pack(fill="both")
         tframe2 = tk.Frame(master=tl)
@@ -2859,14 +2874,14 @@ class App(tk.Menu):
         )
         tlabel_title.pack()
         for i, j in enumerate((
-            version, build_date, update_date,
+            version, build_date, update_date, thanks_to,
             developed_by, contact, github
         )):
             tlabel_info_1 = tk.Label(master=tframe2, text=j,
                                      font="Arial 12", fg="red")
             tlabel_info_1.grid(row=i, column=0, sticky="w")
         for i, j in enumerate((
-            _version, _build_date, _update_date,
+            _version, _build_date, _update_date, _thanks_to,
             _developed_by, _contact, _github
         )):
             if j == _github:
