@@ -22,33 +22,33 @@ python3 SynastryParser.py
 
 **1.** Aspect distribution according to planets:
 
-![img1](https://user-images.githubusercontent.com/29302909/72226866-0c46d280-35a7-11ea-8777-5a06da5689b2.png)
-![img2](https://user-images.githubusercontent.com/29302909/72260585-3ab6c300-3624-11ea-98e1-0caebccb7a6e.jpeg)
+![img1](https://user-images.githubusercontent.com/29302909/72392736-d427c700-3741-11ea-8e2b-c1c193e4c6fc.png)
+![img2](https://user-images.githubusercontent.com/29302909/72392738-d5f18a80-3741-11ea-8027-b14b5bf05c21.jpeg)
 
 **2.** Sign positions of planets:
 
-![img3](https://user-images.githubusercontent.com/29302909/72228265-48cdfa80-35b6-11ea-8da1-440b8cc3922b.png)
-![img4](https://user-images.githubusercontent.com/29302909/72260594-3db1b380-3624-11ea-9788-81a422e2262c.jpeg)
+![img3](https://user-images.githubusercontent.com/29302909/72392742-d722b780-3741-11ea-853d-f7e1b0a61640.png)
+![img4](https://user-images.githubusercontent.com/29302909/72392746-d8ec7b00-3741-11ea-9159-74a78bc0848f.jpeg)
 
-**3.** House positions of planets (Personal)
+**3.** House positions of planets (Personal):
 
-![img5](https://user-images.githubusercontent.com/29302909/72227174-6a28e980-35aa-11ea-8262-62237e32e440.png)
-![img6](https://user-images.githubusercontent.com/29302909/72260600-3f7b7700-3624-11ea-98cc-5bfa8dff6ced.jpeg)
+![img5](https://user-images.githubusercontent.com/29302909/72392752-dd189880-3741-11ea-8752-602a3f038e9e.png)
+![img6](https://user-images.githubusercontent.com/29302909/72392753-dee25c00-3741-11ea-948c-3678e5d1f30c.jpeg)
 
-**4.** House positions of planets-signs (Personal)
+**4.** House positions of planets-signs (Personal):
 
-![img7](https://user-images.githubusercontent.com/29302909/72228326-b5e19000-35b6-11ea-89e5-c624d546865e.png)
-![img8](https://user-images.githubusercontent.com/29302909/72260667-676ada80-3624-11ea-8cc5-e0cfdc871e94.jpeg)
+![img7](https://user-images.githubusercontent.com/29302909/72392757-e0ac1f80-3741-11ea-9a2b-af71970b7baf.png)
+![img8](https://user-images.githubusercontent.com/29302909/72392763-e275e300-3741-11ea-991d-a3223e2fba9d.jpeg)
 
-**5.** House positions of planets (Synastry)
+**5.** House positions of planets (Synastry):
 
-![img9](https://user-images.githubusercontent.com/29302909/72228363-0a850b00-35b7-11ea-825e-54618862080b.png)
-![img10](https://user-images.githubusercontent.com/29302909/72260865-c6c8ea80-3624-11ea-9bc2-333af5cda94d.jpeg)
+![img9](https://user-images.githubusercontent.com/29302909/72392765-e3a71000-3741-11ea-8653-79e4b85c309a.png)
+![img10](https://user-images.githubusercontent.com/29302909/72392766-e570d380-3741-11ea-8e39-733a54bf5827.jpeg)
 
-**6.** House positions of planets-signs (Synastry)
+**6.** House positions of planets-signs (Synastry):
 
-![img11](https://user-images.githubusercontent.com/29302909/72228387-28eb0680-35b7-11ea-95bf-0c23a0879398.png)
-![img12](https://user-images.githubusercontent.com/29302909/72261043-21fadd00-3625-11ea-9534-5123f89eff87.jpeg)
+![img11](https://user-images.githubusercontent.com/29302909/72392768-e73a9700-3741-11ea-9c39-b9538c5b42eb.png)
+![img12](https://user-images.githubusercontent.com/29302909/72392773-e9045a80-3741-11ea-89cf-3c6a4e12d4f7.jpeg)
 
 ## Notes
 
