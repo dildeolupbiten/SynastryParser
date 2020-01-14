@@ -415,7 +415,6 @@ def split_gauquelin_data():
         for i in urllib.request.urlopen(url)
     ]
     males = [data[i] for i in range(0, len(data), 2)]
-    females = [data[i] for i in range(1, len(data), 2)]
     try:
         with open(f"{FILENAME}.csv", "r") as case:
             with open(f"{FILENAME}_Before_1900.csv", "w") as before:
