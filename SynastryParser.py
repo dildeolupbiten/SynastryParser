@@ -78,11 +78,11 @@ except ModuleNotFoundError:
     import xlrd
 try:
     import shapely
-except ModuleNotFoundError:            
+except ModuleNotFoundError:
     select_module(
-        "shapely", 
+        "shapely",
         [i for i in os.listdir(whl_path) if "Shapely" in i]
-    )      
+    )
 try:
     import swisseph as swe
 except ModuleNotFoundError:
@@ -100,8 +100,8 @@ try:
     from tzwhere import tzwhere
 except ModuleNotFoundError:
     os.system("pip3 install tzwhere")
-    from tzwhere import tzwhere    
-    
+    from tzwhere import tzwhere
+
 swe.set_ephe_path(os.path.join(os.getcwd(), "Eph"))
 
 URL = "http://cura.free.fr/gauq/Gau_Partners_A_to_M_41832.dat"
@@ -229,7 +229,7 @@ TBL_PSPS_PRSNL = {
             for _sign in SIGNS
         }
         for house in HOUSES
-     }
+    }
     for sign in SIGNS
 }
 TBL_PSPS_SYNSTRY = {
@@ -241,7 +241,7 @@ TBL_PSPS_SYNSTRY = {
             for _sign in SIGNS
         }
         for house in HOUSES
-     }
+    }
     for sign in SIGNS
 }
 HSYS = "P"
@@ -263,14 +263,14 @@ def info(s, c, n):
             "\u25a0" * int(20 * c / s),
             " " * (20 - int(20 * c / s)),
             int(100 * c / s),
-            c,            
+            c,
             int(time.time() - n),
             round(c / (time.time() - n), 1),
             int(s / (c / (time.time() - n))) - int(time.time() - n)
         )
     )
     sys.stdout.flush()
-    
+
 
 def julday(
         year: int = 0,
@@ -356,14 +356,14 @@ def convert_raw_data():
         count += 1
         info(s=size, c=count, n=now)
     print()
-    
-    
+
+
 def rename_csv_file(name):
     file = f"{name}.csv"
     length = len([i for i in open(file, "r")])
     os.rename(file, file.replace("41832", f"{length}"))
-    
-    
+
+
 def create_control_group():
     url = URL
     data = [
@@ -395,7 +395,7 @@ def create_control_group():
                                 control.write(f"{case_lines[i * 2]}")
                                 control.write(f"{case_lines[index]}")
                                 control.flush()
-                                temp_females.pop(j)                               
+                                temp_females.pop(j)
                                 break
                             except IndexError:
                                 pass
@@ -405,8 +405,8 @@ def create_control_group():
             logging.info("Completed creating control group.")
     except FileNotFoundError:
         logging.info(f"{FILENAME}.csv is not found.")
-        
-        
+
+
 def split_gauquelin_data():
     url = URL
     data = [
@@ -438,8 +438,8 @@ def split_gauquelin_data():
             rename_csv_file(name=f"{FILENAME}_After_1900")
             logging.info("Completed splitting control group.")
     except FileNotFoundError:
-        logging.info(f"{FILENAME}.csv is not found.")     
-    
+        logging.info(f"{FILENAME}.csv is not found.")
+
 
 class Chart:
     PLANET_DICT = {
@@ -459,7 +459,7 @@ class Chart:
     }
 
     def __init__(
-            self, 
+            self,
             jd: float = 0,
             lat: float = 0,
             lon: float = 0,
@@ -507,7 +507,7 @@ class Chart:
             house = [
                 int(self.house_pos()[0][i][0]),
                 self.house_pos()[0][i][-1],
-                float(self.house_pos()[0][i][1]),                  
+                float(self.house_pos()[0][i][1]),
             ]
             house_positions.append(house)
         hp = [j[-1] for j in house_positions]
@@ -520,18 +520,18 @@ class Chart:
                         house = i + 1
                         break
                     elif hp[i] > 300 and 60 > hp[i + 1] > planet[1] < hp[i]:
-                        house = i + 1   
+                        house = i + 1
                         break
                     elif 300 < hp[i] < planet[1] > hp[i + 1] < 60:
-                        house = i + 1   
-                        break                      
-                else:                                  
+                        house = i + 1
+                        break
+                else:
                     if hp[i] < planet[1] < hp[0]:
                         house = i + 1
                     elif hp[i] > 300 and 60 > hp[0] > planet[1] < hp[i]:
                         house = i + 1
                     elif 300 < hp[i] < planet[1] > hp[0] < 60:
-                        house = i + 1   
+                        house = i + 1
             planet_info = [
                 key,
                 planet[0],
@@ -545,8 +545,8 @@ class Chart:
         mc[0] = "MC"
         planet_positions.extend([asc, mc])
         return planet_positions, house_positions
-           
-       
+
+
 def find_aspect(natal1: list = [], natal2: list = []):
     result = {}
     for i in natal1:
@@ -612,9 +612,9 @@ def create_table(
         i = OBJECTS.index(obj)
         arr[SIGNS.index(_y[k][1])][SIGNS.index(_x[i][1])] = \
             search_aspect(
-                x_=_x[i][2], 
-                y_=_y[k][2], 
-                orb=orb, 
+                x_=_x[i][2],
+                y_=_y[k][2],
+                orb=orb,
                 aspect=aspect
             )
         match = {
@@ -628,11 +628,11 @@ def create_table(
 def change_mode(_info: list = [], mode: dict = {}):
     for i, j in enumerate(_info):
         _info[i] = [_info[i][0]] + \
-                  [mode[_info[i][1]]] + \
-                  [
-                      SST[mode[_info[i][1]]] +
-                      30 - _info[i][2] % 30
-                  ]
+                   [mode[_info[i][1]]] + \
+                   [
+                       SST[mode[_info[i][1]]] +
+                       30 - _info[i][2] % 30
+                   ]
     return _info
 
 
@@ -683,7 +683,7 @@ def activate_selections(
             result += eval(v),
             for i in OBJECTS:
                 if i in selected:
-                    code = f"create_table(_x=x, _y=y, obj='{i}', "\
+                    code = f"create_table(_x=x, _y=y, obj='{i}', " \
                            f"aspect=ANGLE['{k}'], orb={k.upper()})"
                     signs += eval(code),
     return result, signs
@@ -712,7 +712,7 @@ def count_aspects_1(arg=(), file_list=[], count=1):
             return count_aspects_1(result, file_list, count)
         else:
             return result
-    
+
 
 def count_aspects_2(split_list: list = [], selected: list = []):
     final = []
@@ -734,8 +734,8 @@ def count_aspects_2(split_list: list = [], selected: list = []):
             final.append(result)
             count += 1
     return final
-    
-    
+
+
 def r_aspect_dist_acc_to_objects(
         file: list = [],
         selected: list = [],
@@ -755,7 +755,7 @@ def r_aspect_dist_acc_to_objects(
         )
         split_list.append(splitted[1])
         file_list.append(splitted[0])
-    item1 = file_list[0]   
+    item1 = file_list[0]
     return count_aspects_1(item1, file_list, 1), \
         count_aspects_2(split_list, selected)
 
@@ -802,14 +802,14 @@ def r_syn_object_dist_acc_to_signs_or_houses(
         for i in range(0, size, 2):
             old_male = Chart(
                 *[
-                    float(col) 
+                    float(col)
                     for col in readlines[i][:-1].split(",")
                 ],
                 HSYS
             ).patterns()
             old_female = Chart(
                 *[
-                    float(col) 
+                    float(col)
                     for col in readlines[i + 1][:-1].split(",")
                 ],
                 HSYS
@@ -823,7 +823,7 @@ def r_syn_object_dist_acc_to_signs_or_houses(
             info(s=size, c=count, n=now)
         print()
 
-        
+
 def r_object_dist_acc_to_signs_or_houses(
         file: str = "",
         arg1: str = "",
@@ -911,8 +911,8 @@ def r_syn_object_sign_dist_acc_to_houses(
             count += 2
             info(s=size, c=count, n=now)
         print()
-            
-            
+
+
 def font(name: str = "Arial", bold: bool = False):
     f = xlwt.Font()
     f.name = name
@@ -925,10 +925,10 @@ class Spreadsheet(xlwt.Workbook):
     obj = None
 
     def __init__(
-            self, 
-            arg1: str = "", 
-            arg2: str = "", 
-            arg3: str = "", 
+            self,
+            arg1: str = "",
+            arg2: str = "",
+            arg3: str = "",
             arg4: str = ""
     ):
         xlwt.Workbook.__init__(self)
@@ -954,7 +954,7 @@ class Spreadsheet(xlwt.Workbook):
         arr = [[int(j) for j in list(i)] for i in transpose]
         for i, j in enumerate(table):
             temporary[j] = arr[i]
-        label = f"{aspect.upper()} "\
+        label = f"{aspect.upper()} " \
                 f"(Orb Factor: \u00b1 {eval(aspect.upper())}\u00b0)"
         self.sheet.write_merge(
             r1=0 + self.size,
@@ -999,26 +999,26 @@ class Spreadsheet(xlwt.Workbook):
                 )
                 col += 1
             row += 1
-        self.size += len(table.keys()) + 3  
-        
+        self.size += len(table.keys()) + 3
+
     def create_tables(
             self, files: list = [], selected: list = [],
             modes: list = [], num: int = 0, file: str = "",
             number_of_records: int = 0
     ):
-        read = r_aspect_dist_acc_to_objects(files, selected, modes)  
+        read = r_aspect_dist_acc_to_objects(files, selected, modes)
         self.style.font = font(bold=True)
         self.sheet.write(
             r=0, c=0, label="File", style=self.style
-        )     
+        )
         self.style.font = font(bold=False)
         self.sheet.write_merge(
-            r1=0, c1=1, r2=0, c2=4, 
+            r1=0, c1=1, r2=0, c2=4,
             label=f"{os.path.split(file)[-1]}", style=self.style
         )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records",
             style=self.style
         )
         self.style.font = font(bold=False)
@@ -1082,7 +1082,7 @@ class Spreadsheet(xlwt.Workbook):
                                         )
                                     row = 0
                                     for key, value in signs[count][
-                                            OBJECTS.index(j)
+                                        OBJECTS.index(j)
                                     ].items():
                                         for ind, val in enumerate(value):
                                             self.sheet.write(
@@ -1099,11 +1099,11 @@ class Spreadsheet(xlwt.Workbook):
                 pass
         except TypeError:
             pass
-            
+
     def w_object_dist_acc_to_signs_or_houses(
-            self, 
-            table: dict = {}, 
-            modes: list = [], 
+            self,
+            table: dict = {},
+            modes: list = [],
             selected_obj: list = [],
             selection: str = "",
             file: str = "",
@@ -1115,12 +1115,12 @@ class Spreadsheet(xlwt.Workbook):
         )
         self.style.font = font(bold=False)
         self.sheet.write_merge(
-            r1=0, c1=1, r2=0, c2=4, 
+            r1=0, c1=1, r2=0, c2=4,
             label=f"{os.path.split(file)[-1]}", style=self.style
         )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records",
             style=self.style
         )
         self.style.font = font(bold=False)
@@ -1136,7 +1136,7 @@ class Spreadsheet(xlwt.Workbook):
             _row = 3
             self.style.font = font(bold=True)
             self.sheet.write_merge(
-                r1=2, c1=0, r2=2, c2=1, label="House System", 
+                r1=2, c1=0, r2=2, c2=1, label="House System",
                 style=self.style
             )
             self.style.font = font(bold=False)
@@ -1159,9 +1159,9 @@ class Spreadsheet(xlwt.Workbook):
             female_label = "Females'\n" + selected_obj[1] + "\nin Houses"
         elif selection == "Synastry_House":
             male_label = "Males' " + selected_obj[0] + \
-                " in Females' Houses"
+                         " in Females' Houses"
             female_label = "Females'\n" + selected_obj[1] + \
-                "\nin Males'\nHouses"
+                           "\nin Males'\nHouses"
         else:
             male_label = "Males' " + selected_obj[0] + " in Signs"
             female_label = "Females'\n" + selected_obj[1] + "\nin Signs"
@@ -1182,14 +1182,14 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=_row + 17, c=1, label="Total", style=self.style)
         self.style.font = font(bold=False)
         row = _row + 5
-        column = 2       
-        for keys, values in table.items():            
+        column = 2
+        for keys, values in table.items():
             r = 0
             for subkeys, subvalues in values.items():
                 self.sheet.write(
-                    r=row + r, 
-                    c=column, 
-                    label=subvalues, 
+                    r=row + r,
+                    c=column,
+                    label=subvalues,
                     style=self.style
                 )
                 r += 1
@@ -1204,7 +1204,7 @@ class Spreadsheet(xlwt.Workbook):
                 ),
                 style=self.style
             )
-            
+
             self.sheet.write(
                 row, 14,
                 xlwt.Formula(
@@ -1227,27 +1227,27 @@ class Spreadsheet(xlwt.Workbook):
         )
 
     def w_object_sign_dist_acc_to_houses(
-            self, 
-            table: dict = {}, 
-            modes: list = [], 
+            self,
+            table: dict = {},
+            modes: list = [],
             selected_obj: list = [],
             selected_sign: list = [],
             selection: str = "",
             file: str = "",
-            number_of_records: int = 0            
-    ):    
+            number_of_records: int = 0
+    ):
         self.style.font = font(bold=True)
         self.sheet.write(
             r=0, c=0, label="File", style=self.style
         )
         self.style.font = font(bold=False)
         self.sheet.write_merge(
-            r1=0, c1=1, r2=0, c2=4, 
+            r1=0, c1=1, r2=0, c2=4,
             label=f"{os.path.split(file)[-1]}", style=self.style
         )
         self.style.font = font(bold=True)
         self.sheet.write_merge(
-            r1=1, c1=0, r2=1, c2=1, label="Number of Records", 
+            r1=1, c1=0, r2=1, c2=1, label="Number of Records",
             style=self.style
         )
         self.style.font = font(bold=False)
@@ -1273,30 +1273,30 @@ class Spreadsheet(xlwt.Workbook):
         self.sheet.write(r=4, c=2, label=modes[1], style=self.style)
         self.style.font = font(bold=True)
         if selection == "Synastry_Object_Sign":
-            male_label = f"Males' {selected_obj[0]} "\
+            male_label = f"Males' {selected_obj[0]} " \
                          f"({selected_sign[0]}) in Females' Houses"
-            female_label = f"Females'\n{selected_obj[1]}\n"\
+            female_label = f"Females'\n{selected_obj[1]}\n" \
                            f"({selected_sign[1]})\nin Males'\nHouses"
             filename = "Synastry"
         else:
-            male_label = f"Males' {selected_obj[0]} "\
+            male_label = f"Males' {selected_obj[0]} " \
                          f"({selected_sign[0]}) in Houses"
-            female_label = f"Females'\n{selected_obj[1]}\n"\
+            female_label = f"Females'\n{selected_obj[1]}\n" \
                            f"({selected_sign[1]})\nin Houses"
             filename = "Personal"
         self.sheet.write_merge(
             r1=6,
-            c1=2, 
+            c1=2,
             r2=6,
-            c2=13, 
+            c2=13,
             label=male_label,
             style=self.style
         )
         self.sheet.write_merge(
             r1=8,
-            c1=0, 
+            c1=0,
             r2=19,
-            c2=0, 
+            c2=0,
             label=female_label,
             style=self.style
         )
@@ -1341,7 +1341,7 @@ class Spreadsheet(xlwt.Workbook):
         self.save(
             f"{filename}_Male_{self.arg1}_{self.arg3}_"
             f"Female_{self.arg2}_{self.arg4}.xlsx"
-        )         
+        )
 
 
 class Plot:
@@ -1358,7 +1358,7 @@ class Plot:
         plt.ylabel(_y_label)
         plt.legend()
         plt.show()
-        
+
     @classmethod
     def plot(cls, *args):
         n = 0
@@ -1371,7 +1371,7 @@ class Plot:
             )
             n += 2
         cls.__plt(_x_label=args[-1], _y_label="Number of people")
-        
+
     @classmethod
     def bar(cls, *args):
         n = 0
@@ -1383,16 +1383,16 @@ class Plot:
             )
             n += 2
         cls.__plt(_x_label="Age Difference", _y_label="Number of couple")
-      
-    
+
+
 def frequency(l: list = [], d: dict = {}):
     for i in l:
         if i in d.keys():
             d[i] += 1
         else:
             d[i] = 1
-            
-            
+
+
 def year_long_lati_frequency(
         name: str = "",
         index: int = 0
@@ -1432,14 +1432,14 @@ def year_long_lati_frequency(
             )
             f.flush()
     Plot.plot(
-        list(male_dict.keys()), 
+        list(male_dict.keys()),
         list(male_dict.values()),
         list(female_dict.keys()),
         list(female_dict.values()),
         name
     )
-    
-    
+
+
 def age_differences_frequency():
     url = URL
     age_diffs = []
@@ -1503,7 +1503,7 @@ def age_differences_frequency():
         g.write(f"|{str(keys).center(23)}|{str(values).center(7)}|\n")
         g.flush()
     Plot.bar(
-        list(age_diff_freq.keys()), 
+        list(age_diff_freq.keys()),
         list(age_diff_freq.values())
     )
 
@@ -1659,7 +1659,7 @@ class App(tk.Menu):
             width=400,
             height=20
         )
-        self.frame.pack()          
+        self.frame.pack()
         self.button = tk.Button(
             master=self.master,
             text="Start",
@@ -1677,8 +1677,8 @@ class App(tk.Menu):
         self.alignment.horz = xlwt.Alignment.HORZ_CENTER
         self.alignment.vert = xlwt.Alignment.VERT_CENTER
         self.style.alignment = self.alignment
-        self.button.pack()    
-    
+        self.button.pack()
+
     @staticmethod
     def get_data(sheet):
         data = []
@@ -1689,60 +1689,60 @@ class App(tk.Menu):
 
     def special_cells(self, new_sheet, i):
         self.style.font = font(bold=True)
-        if "Orb" in i[1]:      
+        if "Orb" in i[1]:
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0], 
-                c1=i[0][1], 
+                r1=i[0][0],
+                r2=i[0][0],
+                c1=i[0][1],
                 c2=i[0][1] + 15,
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif "Mode" in i[1]:
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0] + 1, 
-                c1=i[0][1], 
+                r1=i[0][0],
+                r2=i[0][0] + 1,
+                c1=i[0][1],
                 c2=i[0][1],
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif "csv" in i[1]:
             self.style.font = font(bold=False)
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0], 
-                c1=i[0][1], 
+                r1=i[0][0],
+                r2=i[0][0],
+                c1=i[0][1],
                 c2=i[0][1] + 4,
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif "Number of Records" in i[1]:
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0], 
-                c1=i[0][1], 
+                r1=i[0][0],
+                r2=i[0][0],
+                c1=i[0][1],
                 c2=i[0][1] + 1,
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif i[0][0] in [i__ for i__ in range(23, 232, 15)]:
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0], 
-                c1=2, 
+                r1=i[0][0],
+                r2=i[0][0],
+                c1=2,
                 c2=13,
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif i[0][0] in [i__ for i__ in range(25, 250, 15)] \
                 and i[0][1] == 0:
             new_sheet.write_merge(
-                r1=i[0][0], 
-                r2=i[0][0] + 11, 
-                c1=0, 
+                r1=i[0][0],
+                r2=i[0][0] + 11,
+                c1=0,
                 c2=0,
-                label=i[1], 
+                label=i[1],
                 style=self.style
             )
         elif i[0][0] == 1:
@@ -1750,7 +1750,7 @@ class App(tk.Menu):
             new_sheet.write(*i[0], i[1], style=self.style)
             self.style.font = font(bold=True)
         else:
-            if "Natal" in i[1]:                
+            if "Natal" in i[1]:
                 self.style.font = font(bold=False)
             else:
                 self.style.font = font(bold=True)
@@ -1763,7 +1763,7 @@ class App(tk.Menu):
                 xlrd.open_workbook(file).sheet_by_name("Sheet1")
             )
             for file in sorted(os.listdir("."))
-            if file.startswith("part") and file.endswith("xlsx")   
+            if file.startswith("part") and file.endswith("xlsx")
         ]
         index = 2
         s = len(datas())
@@ -1780,8 +1780,8 @@ class App(tk.Menu):
                         if isinstance(i[1], float) and \
                                 isinstance(j[1], float):
                             new_sheet.write(
-                                *i[0], 
-                                i[1] + j[1], 
+                                *i[0],
+                                i[1] + j[1],
                                 style=self.style
                             )
                         else:
@@ -1818,7 +1818,7 @@ class App(tk.Menu):
     def start(
             self,
             selected: list = [],
-            selected_obj: list = [], 
+            selected_obj: list = [],
             selected_sign: list = []
     ):
         global TBL_SS, TBL_HH_PRSNL, TBL_PSPS_PRSNL
@@ -1834,14 +1834,14 @@ class App(tk.Menu):
             ASPECTS[7]: SESQUIQUADRATE,
             ASPECTS[8]: BIQUINTILE,
             ASPECTS[9]: QUINCUNX,
-            ASPECTS[10]: OPPOSITE,                        
+            ASPECTS[10]: OPPOSITE,
         }
         if len(selected) == 2 and len(selected_obj) == 0 \
                 and len(selected_sign) == 0:
-            try:            
+            try:
                 file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
-                    )
+                )
                 files = [i for i in open(file, "r").readlines()]
                 s = len(files)
                 n = time.time()
@@ -1865,18 +1865,18 @@ class App(tk.Menu):
                 )
                 for i in range(len(files)):
                     if i % 400 == 0:
-                        parted = files[i:i + 400]              
+                        parted = files[i:i + 400]
                         part = Spreadsheet()
                         part.create_tables(
-                                files=parted,
-                                num=num,
-                                selected=[
-                                    j.replace("-", "_") 
-                                    for j in selected
-                                ],
-                                modes=self.modes,
-                                file=file,
-                                number_of_records=s
+                            files=parted,
+                            num=num,
+                            selected=[
+                                j.replace("-", "_")
+                                for j in selected
+                            ],
+                            modes=self.modes,
+                            file=file,
+                            number_of_records=s
                         )
                         num += 1
                     c += 1
@@ -1915,14 +1915,14 @@ class App(tk.Menu):
                 Spreadsheet(
                     arg1=selected_obj[0],
                     arg2=selected_obj[1]
-                 ).w_object_dist_acc_to_signs_or_houses(
+                ).w_object_dist_acc_to_signs_or_houses(
                     table=TBL_SS,
                     modes=self.modes,
                     selected_obj=selected_obj,
                     selection="Sign",
                     file=ask_file,
                     number_of_records=s
-                 )
+                )
                 logging.info(
                     "Calculation of 'Sign positions of objects' is completed."
                 )
@@ -2072,7 +2072,7 @@ class App(tk.Menu):
                     arg2=selected_obj[1],
                     arg3=selected_sign[0],
                     arg4=selected_sign[1]
-                 ).w_object_sign_dist_acc_to_houses(
+                ).w_object_sign_dist_acc_to_houses(
                     table=TBL_PSPS_PRSNL,
                     modes=self.modes,
                     selected_obj=selected_obj,
@@ -2080,14 +2080,14 @@ class App(tk.Menu):
                     selection=self.selection,
                     file=ask_file,
                     number_of_records=s
-                 )
+                )
                 logging.info(
                     "Calculation of 'House positions of "
                     "objects-signs (Personal)' is completed."
                 )
                 msgbox.showinfo(
                     message="Calculation of 'House positions of "
-                    "objects-signs (Personal)' is completed."
+                            "objects-signs (Personal)' is completed."
                 )
                 TBL_PSPS_PRSNL = {
                     sign: {
@@ -2135,7 +2135,7 @@ class App(tk.Menu):
                     arg2=selected_obj[1],
                     arg3=selected_sign[0],
                     arg4=selected_sign[1]
-                 ).w_object_sign_dist_acc_to_houses(
+                ).w_object_sign_dist_acc_to_houses(
                     table=TBL_PSPS_SYNSTRY,
                     modes=self.modes,
                     selected_obj=selected_obj,
@@ -2143,7 +2143,7 @@ class App(tk.Menu):
                     selection=self.selection,
                     file=ask_file,
                     number_of_records=s
-                 )
+                )
                 logging.info(
                     "Calculation of 'House positions "
                     "of objects-signs (Synastry)' is completed."
@@ -2173,8 +2173,8 @@ class App(tk.Menu):
 
     @staticmethod
     def check_uncheck(
-            checkbuttons: dict = {}, 
-            array: list = [], 
+            checkbuttons: dict = {},
+            array: list = [],
             j: str = ""
     ):
         for i in array:
@@ -2207,7 +2207,7 @@ class App(tk.Menu):
                 text
             )
         )
-        
+
     def select_tables(self, checkbuttons: dict = {}):
         self.selected = []
         for i, j in enumerate(ASPECTS):
@@ -2240,8 +2240,8 @@ class App(tk.Menu):
         main_frame = tk.Frame(master=self.t_aspect_dist_acc_to_objects)
         main_frame.pack()
         left_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
+            master=main_frame,
+            bd=1,
             relief="sunken",
         )
         left_frame.pack(side="left", fill="both")
@@ -2277,7 +2277,7 @@ class App(tk.Menu):
                     column=0,
                     checkbuttons=checkbuttons,
                     array=[
-                        asp.replace("_", "-") 
+                        asp.replace("_", "-")
                         for asp in ASPECTS if asp != "null"
                     ]
                 )
@@ -2298,10 +2298,10 @@ class App(tk.Menu):
             command=lambda: self.select_tables(checkbuttons)
         )
         apply_button.pack(side="bottom")
-        
+
     def select_objects(
-            self, 
-            checkbuttons1: dict = {}, 
+            self,
+            checkbuttons1: dict = {},
             checkbuttons2: dict = {}
     ):
         self.selected_obj = []
@@ -2320,7 +2320,7 @@ class App(tk.Menu):
             self.t_object_dist_acc_to_signs = None
             self.selected = []
             self.selected_sign = []
-        
+
     def object_dist_acc_to_signs(self):
         self.selection = "Sign"
         self.t_object_dist_acc_to_signs = tk.Toplevel()
@@ -2334,8 +2334,8 @@ class App(tk.Menu):
         main_frame = tk.Frame(master=self.t_object_dist_acc_to_signs)
         main_frame.pack()
         left_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
+            master=main_frame,
+            bd=1,
             relief="sunken"
         )
         left_frame.pack(side="left")
@@ -2480,8 +2480,8 @@ class App(tk.Menu):
         apply_button.pack(side="bottom")
 
     def select_objects_signs(
-            self, 
-            checkbuttons1: dict = {}, 
+            self,
+            checkbuttons1: dict = {},
             checkbuttons2: dict = {},
             checkbuttons3: dict = {},
             checkbuttons4: dict = {}
@@ -2509,7 +2509,7 @@ class App(tk.Menu):
             self.t_object_sign_dist_acc_to_houses.destroy()
             self.t_object_sign_dist_acc_to_houses = None
             self.selected = []
-        
+
     def object_sign_dist_acc_to_houses(self, title, selection):
         self.selection = selection
         self.t_object_sign_dist_acc_to_houses = tk.Toplevel()
@@ -2521,8 +2521,8 @@ class App(tk.Menu):
         main_frame = tk.Frame(master=self.t_object_sign_dist_acc_to_houses)
         main_frame.pack()
         left_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
+            master=main_frame,
+            bd=1,
             relief="sunken"
         )
         left_frame.pack(side="left")
@@ -2590,7 +2590,7 @@ class App(tk.Menu):
             master=self.t_object_sign_dist_acc_to_houses,
             text="Apply",
             command=lambda: self.select_objects_signs(
-                checkbuttons1, 
+                checkbuttons1,
                 checkbuttons2,
                 checkbuttons3,
                 checkbuttons4
@@ -2648,16 +2648,16 @@ class App(tk.Menu):
         self.t_orb.title("Orb Factor")
         self.t_orb.resizable(width=False, height=False)
         default_orbs = [
-            CONJUNCTION, 
-            SEMI_SEXTILE, 
+            CONJUNCTION,
+            SEMI_SEXTILE,
             SEMI_SQUARE,
-            SEXTILE, 
-            QUINTILE, 
-            SQUARE, 
+            SEXTILE,
+            QUINTILE,
+            SQUARE,
             TRINE,
-            SESQUIQUADRATE, 
-            BIQUINTILE, 
-            QUINCUNX, 
+            SESQUIQUADRATE,
+            BIQUINTILE,
+            QUINCUNX,
             OPPOSITE
         ]
         orb_entries = []
@@ -2678,7 +2678,7 @@ class App(tk.Menu):
             )
         )
         apply_button.grid(row=11, column=0, columnspan=3)
-        
+
     def change_hsys(self, checkbuttons, _house_systems_):
         global HSYS
         if checkbuttons[_house_systems_[0]][1].get() == "1":
@@ -2825,9 +2825,9 @@ class App(tk.Menu):
                 )
             else:
                 with open(
-                    file="README.md", 
-                    mode="w", 
-                    encoding="utf-8"
+                        file="README.md",
+                        mode="w",
+                        encoding="utf-8"
                 ) as g:
                     for i in var_2:
                         g.write(i)
@@ -2855,11 +2855,11 @@ class App(tk.Menu):
                             ["python", "SynastryParser.py"]
                         )
                         os.system(f"TASKKILL /F /PID {os.getpid()}")
-         
-    @staticmethod                    
+
+    @staticmethod
     def callback(event, url):
         webbrowser.open_new(url)
-    
+
     def about(self):
         tl = tk.Toplevel()
         tl.title("About SynastryParser")
@@ -2867,17 +2867,18 @@ class App(tk.Menu):
         version, _version = "Version:", __version__
         build_date, _build_date = "Built Date:", "02.01.2020"
         update_date, _update_date = "Update Date:", \
-            dt.strftime(
-                dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime), 
-                "%d.%m.%Y"
-            )
+                                    dt.strftime(
+                                        dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime),
+                                        "%d.%m.%Y"
+                                    )
         developed_by, _developed_by = "Developed By:", \
                                       "Tanberk Celalettin Kutlu"
         thanks_to, _thanks_to = "Thanks To:", \
-                                "Flavia Alonso, http://cura.free.fr"
+                                "Flavia Alonso, C.U.R.A " \
+                                "(Centre Universitaire de Recherche en Astrologie)"
         contact, _contact = "Contact:", "tckutlu@gmail.com"
         github, _github = "GitHub:", \
-            "https://github.com/dildeolupbiten/SynastryParser"
+                          "https://github.com/dildeolupbiten/SynastryParser"
         tframe1 = tk.Frame(master=tl, bd="2", relief="groove")
         tframe1.pack(fill="both")
         tframe2 = tk.Frame(master=tl)
@@ -2887,19 +2888,19 @@ class App(tk.Menu):
         )
         tlabel_title.pack()
         for i, j in enumerate((
-            version, build_date, update_date, thanks_to,
-            developed_by, contact, github
+                version, build_date, update_date, thanks_to,
+                developed_by, contact, github
         )):
             tlabel_info_1 = tk.Label(master=tframe2, text=j,
-                                     font="Arial 12", fg="red")
+                                     font="Arial 11", fg="red")
             tlabel_info_1.grid(row=i, column=0, sticky="w")
         for i, j in enumerate((
-            _version, _build_date, _update_date, _thanks_to,
-            _developed_by, _contact, _github
+                _version, _build_date, _update_date, _thanks_to,
+                _developed_by, _contact, _github
         )):
             if j == _github:
                 tlabel_info_2 = tk.Label(master=tframe2, text=j,
-                                         font="Arial 12", fg="blue",
+                                         font="Arial 11", fg="blue",
                                          cursor="hand2")
                 url1 = "https://github.com/dildeolupbiten/SynastryParser"
                 tlabel_info_2.bind(
@@ -2907,7 +2908,7 @@ class App(tk.Menu):
                     lambda event: self.callback(event, url1))
             elif j == _contact:
                 tlabel_info_2 = tk.Label(master=tframe2, text=j,
-                                         font="Arial 12", fg="blue",
+                                         font="Arial 11", fg="blue",
                                          cursor="hand2")
                 url2 = "mailto://tckutlu@gmail.com"
                 tlabel_info_2.bind(
@@ -2915,7 +2916,7 @@ class App(tk.Menu):
                     lambda event: self.callback(event, url2))
             else:
                 tlabel_info_2 = tk.Label(master=tframe2, text=j,
-                                         font="Arial 12")
+                                         font="Arial 11")
             tlabel_info_2.grid(row=i, column=1, sticky="w")
 
 
