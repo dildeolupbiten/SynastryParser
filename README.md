@@ -23,32 +23,32 @@ python3 SynastryParser.py
 **1.** Aspect distribution according to planets:
 
 ![img1](https://user-images.githubusercontent.com/29302909/72392736-d427c700-3741-11ea-8e2b-c1c193e4c6fc.png)
-![img2](https://user-images.githubusercontent.com/29302909/72392738-d5f18a80-3741-11ea-8027-b14b5bf05c21.jpeg)
+![img2](https://user-images.githubusercontent.com/29302909/72393383-bfe4c980-3743-11ea-8bb4-61b51708efe4.jpeg)
 
 **2.** Sign positions of planets:
 
 ![img3](https://user-images.githubusercontent.com/29302909/72392742-d722b780-3741-11ea-853d-f7e1b0a61640.png)
-![img4](https://user-images.githubusercontent.com/29302909/72392746-d8ec7b00-3741-11ea-9159-74a78bc0848f.jpeg)
+![img4](https://user-images.githubusercontent.com/29302909/72393385-c1ae8d00-3743-11ea-9bf2-e27b2fd69a36.jpeg)
 
 **3.** House positions of planets (Personal):
 
 ![img5](https://user-images.githubusercontent.com/29302909/72392752-dd189880-3741-11ea-8752-602a3f038e9e.png)
-![img6](https://user-images.githubusercontent.com/29302909/72392753-dee25c00-3741-11ea-948c-3678e5d1f30c.jpeg)
+![img6](https://user-images.githubusercontent.com/29302909/72393387-c3785080-3743-11ea-8b7d-1cfa8e41de88.jpeg)
 
 **4.** House positions of planets-signs (Personal):
 
 ![img7](https://user-images.githubusercontent.com/29302909/72392757-e0ac1f80-3741-11ea-9a2b-af71970b7baf.png)
-![img8](https://user-images.githubusercontent.com/29302909/72392763-e275e300-3741-11ea-991d-a3223e2fba9d.jpeg)
+![img8](https://user-images.githubusercontent.com/29302909/72393391-c4a97d80-3743-11ea-8d6b-31210a55a1ec.jpeg)
 
 **5.** House positions of planets (Synastry):
 
 ![img9](https://user-images.githubusercontent.com/29302909/72392765-e3a71000-3741-11ea-8653-79e4b85c309a.png)
-![img10](https://user-images.githubusercontent.com/29302909/72392766-e570d380-3741-11ea-8e39-733a54bf5827.jpeg)
+![img10](https://user-images.githubusercontent.com/29302909/72393392-c6734100-3743-11ea-88a3-e6c52dabf497.jpeg)
 
 **6.** House positions of planets-signs (Synastry):
 
 ![img11](https://user-images.githubusercontent.com/29302909/72392768-e73a9700-3741-11ea-9c39-b9538c5b42eb.png)
-![img12](https://user-images.githubusercontent.com/29302909/72392773-e9045a80-3741-11ea-89cf-3c6a4e12d4f7.jpeg)
+![img12](https://user-images.githubusercontent.com/29302909/72393395-c83d0480-3743-11ea-977b-eb6ccbaef2ad.jpeg)
 
 ## Notes
 
