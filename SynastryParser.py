@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.4"
+__version__ = "1.2.5"
 
 import os
 import sys
@@ -2857,28 +2857,29 @@ class App(tk.Menu):
                         os.system(f"TASKKILL /F /PID {os.getpid()}")
 
     @staticmethod
-    def callback(event, url):
+    def callback(url):
         webbrowser.open_new(url)
 
     def about(self):
         tl = tk.Toplevel()
         tl.title("About SynastryParser")
+        tl.resizable(height=False, width=False)
         name = "SynastryParser"
         version, _version = "Version:", __version__
         build_date, _build_date = "Built Date:", "02.01.2020"
         update_date, _update_date = "Update Date:", \
-                                    dt.strftime(
-                                        dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime),
-                                        "%d.%m.%Y"
-                                    )
+            dt.strftime(
+                dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime),
+                "%d.%m.%Y"
+            )
         developed_by, _developed_by = "Developed By:", \
-                                      "Tanberk Celalettin Kutlu"
-        thanks_to, _thanks_to = "Thanks To:", \
-                                "Flavia Alonso, C.U.R.A " \
-                                "(Centre Universitaire de Recherche en Astrologie)"
+            "Tanberk Celalettin Kutlu"
+        thanks_to, _thanks_to = "Thanks To:", "Flavia Alonso"
+        cura = "C.U.R.A."
+        blank, _thanks_to_ = " " * len("Thanks To:"), cura
         contact, _contact = "Contact:", "tckutlu@gmail.com"
         github, _github = "GitHub:", \
-                          "https://github.com/dildeolupbiten/SynastryParser"
+            "https://github.com/dildeolupbiten/SynastryParser"
         tframe1 = tk.Frame(master=tl, bd="2", relief="groove")
         tframe1.pack(fill="both")
         tframe2 = tk.Frame(master=tl)
@@ -2887,16 +2888,16 @@ class App(tk.Menu):
             master=tframe1, text=name, font="Arial 25"
         )
         tlabel_title.pack()
-        for i, j in enumerate((
-                version, build_date, update_date, thanks_to,
-                developed_by, contact, github
-        )):
+        for i, j in enumerate([
+            version, build_date, update_date, thanks_to,
+            blank, developed_by, contact, github
+        ]):
             tlabel_info_1 = tk.Label(master=tframe2, text=j,
                                      font="Arial 11", fg="red")
             tlabel_info_1.grid(row=i, column=0, sticky="w")
         for i, j in enumerate((
                 _version, _build_date, _update_date, _thanks_to,
-                _developed_by, _contact, _github
+                _thanks_to_, _developed_by, _contact, _github
         )):
             if j == _github:
                 tlabel_info_2 = tk.Label(master=tframe2, text=j,
@@ -2905,18 +2906,37 @@ class App(tk.Menu):
                 url1 = "https://github.com/dildeolupbiten/SynastryParser"
                 tlabel_info_2.bind(
                     "<Button-1>",
-                    lambda event: self.callback(event, url1))
+                    lambda event: self.callback(url1))
             elif j == _contact:
-                tlabel_info_2 = tk.Label(master=tframe2, text=j,
-                                         font="Arial 11", fg="blue",
-                                         cursor="hand2")
+                tlabel_info_2 = tk.Label(
+                    master=tframe2, 
+                    text=j,
+                    font="Arial 11", 
+                    fg="blue",
+                    cursor="hand2"
+                )
                 url2 = "mailto://tckutlu@gmail.com"
                 tlabel_info_2.bind(
                     "<Button-1>",
-                    lambda event: self.callback(event, url2))
+                    lambda event: self.callback(url2))
+            elif j == _thanks_to_:
+                tlabel_info_2 = tk.Label(
+                    master=tframe2, 
+                    text=j,
+                    font="Arial 11", 
+                    fg="blue",
+                    cursor="hand2"
+                )
+                url3 = "http://cura.free.fr/"
+                tlabel_info_2.bind(
+                    "<Button-1>",
+                    lambda event: self.callback(url3))
             else:
-                tlabel_info_2 = tk.Label(master=tframe2, text=j,
-                                         font="Arial 11")
+                tlabel_info_2 = tk.Label(
+                    master=tframe2, 
+                    text=j,
+                    font="Arial 11"
+                )
             tlabel_info_2.grid(row=i, column=1, sticky="w")
 
 
