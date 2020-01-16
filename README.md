@@ -26,7 +26,7 @@ python3 SynastryParser.py
 ![img2](https://user-images.githubusercontent.com/29302909/72538683-40fca780-388f-11ea-85b3-740413a27a18.jpeg)
 
 
-**2.** Aspect distribution of objects:
+**2.** Aspect distributions of objects:
 
 ![img3](https://user-images.githubusercontent.com/29302909/72392736-d427c700-3741-11ea-8e2b-c1c193e4c6fc.png)
 ![img4](https://user-images.githubusercontent.com/29302909/72393383-bfe4c980-3743-11ea-8bb4-61b51708efe4.jpeg)
