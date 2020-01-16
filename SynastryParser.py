@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 
 import os
 import sys
@@ -518,20 +518,27 @@ class Chart:
                 if i != 11:
                     if hp[i] < planet[1] < hp[i + 1]:
                         house = i + 1
-                        break
-                    elif hp[i] > 300 and 60 > hp[i + 1] > planet[1] < hp[i]:
+                        break                        
+                    elif hp[i] < planet[1] > hp[i + 1] \
+                            and hp[i] - hp[i + 1] > 240: 
                         house = i + 1
                         break
-                    elif 300 < hp[i] < planet[1] > hp[i + 1] < 60:
+                    elif hp[i] > planet[1] < hp[i + 1] \
+                            and hp[i] - hp[i + 1] > 240: 
                         house = i + 1
                         break
                 else:
                     if hp[i] < planet[1] < hp[0]:
                         house = i + 1
-                    elif hp[i] > 300 and 60 > hp[0] > planet[1] < hp[i]:
+                        break                        
+                    elif hp[i] < planet[1] > hp[0] \
+                            and hp[i] - hp[0] > 240: 
                         house = i + 1
-                    elif 300 < hp[i] < planet[1] > hp[0] < 60:
+                        break
+                    elif hp[i] > planet[1] < hp[0] \
+                            and hp[i] - hp[0] > 240: 
                         house = i + 1
+                        break
             planet_info = [
                 key,
                 planet[0],
@@ -766,22 +773,29 @@ def synastry_pos(chart1: list = [], chart2: list = []):
         house = 0
         for i in range(12):
             if i != 11:
-                if hp[i] < planet[-2] < hp[i + 1]:
+                if hp[i] < planet[1] < hp[i + 1]:
+                    house = i + 1
+                    break                        
+                elif hp[i] < planet[1] > hp[i + 1] \
+                        and hp[i] - hp[i + 1] > 240: 
                     house = i + 1
                     break
-                elif hp[i] > 300 and 60 > hp[i + 1] > planet[-2] < hp[i]:
-                    house = i + 1
-                    break
-                elif 300 < hp[i] < planet[-2] > hp[i + 1] < 60:
+                elif hp[i] > planet[1] < hp[i + 1] \
+                        and hp[i] - hp[i + 1] > 240: 
                     house = i + 1
                     break
             else:
-                if hp[i] < planet[-2] < hp[0]:
+                if hp[i] < planet[1] < hp[0]:
                     house = i + 1
-                elif hp[i] > 300 and 60 > hp[0] > planet[-2] < hp[i]:
+                    break                        
+                elif hp[i] < planet[1] > hp[0] \
+                        and hp[i] - hp[0] > 240: 
                     house = i + 1
-                elif 300 < hp[i] < planet[-2] > hp[0] < 60:
+                    break
+                elif hp[i] > planet[1] < hp[0] \
+                        and hp[i] - hp[0] > 240: 
                     house = i + 1
+                    break
         chart1[0][ind].append(f"H{house}")
     return chart1[0]
 
@@ -954,8 +968,11 @@ class Spreadsheet(xlwt.Workbook):
         arr = [[int(j) for j in list(i)] for i in transpose]
         for i, j in enumerate(table):
             temporary[j] = arr[i]
-        label = f"{aspect.upper()} " \
-                f"(Orb Factor: \u00b1 {eval(aspect.upper())}\u00b0)"
+        if aspect == "all":
+            label = f"{aspect.upper()}"
+        else:
+            label = f"{aspect.upper()} "\
+                    f"(Orb Factor: +- {eval(aspect.upper())})"
         self.sheet.write_merge(
             r1=0 + self.size,
             r2=0 + self.size,
@@ -1039,6 +1056,20 @@ class Spreadsheet(xlwt.Workbook):
             tables = read[0]
             signs = read[1]
             if tables:
+                if "all" in selected:
+                    result = {}
+                    for i in tables[0]:
+                        result[i] = []
+                        for j in tables:
+                            for k, v in j.items():
+                                if k == i:
+                                    result[i].append(v)
+                        result[i] = sum_arrays(*result[i])
+                    tables += result,
+                    self.w_aspect_dist_acc_to_objects(
+                        tables[-1],
+                        "all",
+                    )
                 count = 0
                 for index, aspect in enumerate(ASPECTS):
                     if aspect in selected:
@@ -1513,6 +1544,7 @@ class App(tk.Menu):
     def __init__(self, master=None):
         tk.Menu.__init__(self, master)
         self.master.configure(menu=self)
+        self.t_aspect_general = None
         self.t_aspect_dist_acc_to_objects = None
         self.t_object_dist_acc_to_signs = None
         self.t_object_dist_acc_to_houses = None
@@ -1576,6 +1608,13 @@ class App(tk.Menu):
         self.frequency.add_command(
             label="Age Difference Frequency",
             command=age_differences_frequency
+        )
+        self.tables.add_command(
+            label="General Aspect distributions",
+            command=lambda: self.open_toplevel(
+                toplevel=self.t_aspect_general,
+                func=self.aspect_general
+            )
         )
         self.tables.add_command(
             label="Aspect distributions of objects",
@@ -1707,6 +1746,16 @@ class App(tk.Menu):
                 label=i[1],
                 style=self.style
             )
+        elif "ALL" in i[1]:
+            self.style.font = font(bold=True)
+            new_sheet.write_merge(
+                r1=i[0][0],
+                r2=i[0][0],
+                c1=i[0][1],
+                c2=i[0][1] + 15,
+                label=i[1],
+                style=self.style
+            )        
         elif "csv" in i[1]:
             self.style.font = font(bold=False)
             new_sheet.write_merge(
@@ -1726,7 +1775,8 @@ class App(tk.Menu):
                 label=i[1],
                 style=self.style
             )
-        elif i[0][0] in [i__ for i__ in range(23, 232, 15)]:
+        elif i[0][0] in [i__ for i__ in range(23, 232, 15)] and \
+                self.selection != "Aspect-General":
             new_sheet.write_merge(
                 r1=i[0][0],
                 r2=i[0][0],
@@ -1736,7 +1786,7 @@ class App(tk.Menu):
                 style=self.style
             )
         elif i[0][0] in [i__ for i__ in range(25, 250, 15)] \
-                and i[0][1] == 0:
+                and i[0][1] == 0 and self.selection != "Aspect-General":
             new_sheet.write_merge(
                 r1=i[0][0],
                 r2=i[0][0] + 11,
@@ -1765,6 +1815,12 @@ class App(tk.Menu):
             for file in sorted(os.listdir("."))
             if file.startswith("part") and file.endswith("xlsx")
         ]
+        if self.selection == "Aspect-General":
+            msg = "Calculation of 'General aspect distributions' "\
+                "is completed."
+        else:
+            msg = "Calculation of 'Aspect distributions of objects' "\
+                "is completed."
         index = 2
         s = len(datas())
         c = 1
@@ -1804,16 +1860,14 @@ class App(tk.Menu):
         else:
             print()
             logging.info("Completed merging the separated files.")
-            os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
+            if self.selection == "Aspect-Detailed":
+                os.rename("part001.xlsx", f"{'_'.join(self.selected)}.xlsx")
+            elif self.selection == "Aspect-General":
+                os.rename("part001.xlsx", f"General_Aspect_Distribution.xlsx")
             self.master.update()
-            logging.info(
-                "Calculation of 'Aspect distributions of objects' "
-                "is completed."
-            )
-            msgbox.showinfo(
-                message="Calculation of 'Aspect distributions of "
-                        "objects' calculation completed."
-            )
+            logging.info(msg)
+            msgbox.showinfo(message=msg)
+
 
     def start(
             self,
@@ -1836,8 +1890,58 @@ class App(tk.Menu):
             ASPECTS[9]: QUINCUNX,
             ASPECTS[10]: OPPOSITE,
         }
-        if len(selected) == 2 and len(selected_obj) == 0 \
-                and len(selected_sign) == 0:
+        if self.selection == "Aspect-General":
+            try:
+                file = filedialog.askopenfilename(
+                    filetypes=[("CSV File", ".csv")]
+                )
+                files = [i for i in open(file, "r").readlines()]
+                s = len(files)
+                n = time.time()
+                c = 0
+                num = 1
+                logging.info(f"File: {os.path.split(file)[-1]}")
+                logging.info(f"Number of records: {s}")
+                logging.info(f"Selected: {', '.join(self.selected)}")
+                logging.info(
+                    f"Orb Factor: \u00b1 "
+                    f"{aspects[self.selected[0].replace('-', '_')]}"
+                    f"\u00b0"
+                )
+                logging.info(f"Mode: {', '.join(self.modes)}")
+                logging.info(
+                    "Calculation of 'General aspect distributions' is started."
+                )
+                logging.info(
+                    f"Separating {len(files)} records into files..."
+                )
+                for i in range(len(files)):
+                    if i % 400 == 0:
+                        parted = files[i:i + 400]
+                        part = Spreadsheet()
+                        part.create_tables(
+                            files=parted,
+                            num=num,
+                            selected=[
+                                j.replace("-", "_")
+                                for j in selected
+                            ],
+                            modes=self.modes,
+                            file=file,
+                            number_of_records=s
+                        )
+                        num += 1
+                    c += 1
+                    info(s=s, n=n, c=c)
+                print()
+                logging.info(
+                    f"Completed separating {len(files)} records into files."
+                )
+                logging.info(f"Merging the separated files...")
+                self.run()
+            except:
+                pass      
+        elif self.selection == "Aspect-Detailed":
             try:
                 file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -1889,8 +1993,7 @@ class App(tk.Menu):
                 self.run()
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 and self.selection == "Sign":
+        elif self.selection == "Sign":
             try:
                 ask_file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -1936,9 +2039,7 @@ class App(tk.Menu):
                 }
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 \
-                and self.selection == "Personal_House":
+        elif self.selection == "Personal_House":
             try:
                 ask_file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -1989,9 +2090,7 @@ class App(tk.Menu):
                 }
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 0 \
-                and self.selection == "Synastry_House":
+        elif self.selection == "Synastry_House":
             try:
                 ask_file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -2041,8 +2140,7 @@ class App(tk.Menu):
                 }
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 2 and self.selection == "Object_Sign":
+        elif self.selection == "Object_Sign":
             try:
                 ask_file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -2103,9 +2201,7 @@ class App(tk.Menu):
                 }
             except:
                 pass
-        elif len(selected) == 0 and len(selected_obj) == 2 and \
-                len(selected_sign) == 2 and \
-                self.selection == "Synastry_Object_Sign":
+        elif self.selection == "Synastry_Object_Sign":
             try:
                 ask_file = filedialog.askopenfilename(
                     filetypes=[("CSV File", ".csv")]
@@ -2172,6 +2268,17 @@ class App(tk.Menu):
             )
 
     @staticmethod
+    def check_all_buttons(check_all=None, cvar_list=[], checkbutton_list=[]):
+        if check_all.get() is True:
+            for var, c_button in zip(cvar_list, checkbutton_list):
+                var.set(True)
+                c_button.configure(variable=var)
+        else:
+            for var, c_button in zip(cvar_list, checkbutton_list):
+                var.set(False)
+                c_button.configure(variable=var)
+
+    @staticmethod
     def check_uncheck(
             checkbuttons: dict = {},
             array: list = [],
@@ -2208,6 +2315,99 @@ class App(tk.Menu):
             )
         )
 
+    def aspect_general(self):
+        self.t_aspect_general = tk.Toplevel()
+        self.t_aspect_general.title("General Aspect Distributions")
+        self.t_aspect_general.resizable(width=False, height=False)
+        main_frame = tk.Frame(master=self.t_aspect_general)
+        main_frame.pack()
+        left_frame = tk.Frame(
+            master=main_frame, 
+            bd=1, 
+            relief="sunken"
+        )
+        left_frame.pack(side="left", fill="both")
+        mid_frame = tk.Frame(
+            master=main_frame, 
+            bd=1, 
+            relief="sunken"
+        )
+        mid_frame.pack(side="left", fill="both")
+        left_frame_label = tk.Label(
+            master=left_frame,
+            text="Select Aspect Types",
+            fg="red"
+        )
+        left_frame_label.pack()
+        mid_frame_label = tk.Label(
+            master=mid_frame,
+            text="Sum All Aspect Types",
+            fg="red"
+        )
+        mid_frame_label.pack()
+        left_cb_frame = tk.Frame(master=left_frame)
+        left_cb_frame.pack()
+        mid_cb_frame = tk.Frame(master=mid_frame)
+        mid_cb_frame.pack()
+        checkbuttons = {}
+        check_all_1 = tk.BooleanVar()
+        check_all_2 = tk.BooleanVar()
+        check_uncheck_1 = tk.Checkbutton(
+            master=left_cb_frame,
+            text="Check/Uncheck All",
+            variable=check_all_1)
+        check_all_1.set(False)
+        check_uncheck_1.grid(row=0, column=0, sticky="w")
+        for i, j in enumerate(ASPECTS, 1):
+            if j != "null":
+                self.checkbutton(
+                    master=left_cb_frame,
+                    text=j,
+                    row=i,
+                    column=0,
+                    checkbuttons=checkbuttons
+                )
+        self.checkbutton(
+            master=mid_cb_frame,
+            text="All Aspects",
+            row=0,
+            column=0,
+            checkbuttons=checkbuttons
+        )
+        cvar_list_1 = [i[1] for i in checkbuttons.values()][:11]
+        cb_list_1 = [i[0] for i in checkbuttons.values()][:11]
+        check_uncheck_1.configure(
+            command=lambda: self.check_all_buttons(
+                check_all_1,
+                cvar_list_1,
+                cb_list_1
+            )
+        )
+        apply_button = tk.Button(
+            master=self.t_aspect_general,
+            text="Apply",
+            command=lambda: self.select_aspects(checkbuttons)
+        )
+        apply_button.pack(side="bottom")
+        
+    def select_aspects(self, checkbuttons={}):
+        self.selected = []
+        for i, j in enumerate(ASPECTS):
+            if j != "null" and checkbuttons[j][1].get() == "1":
+                self.selected.append(j)
+        if checkbuttons["All Aspects"][1].get() == "1":
+            self.selected.append("all")
+        if len(self.selected) < 1:
+            msgbox.showinfo(
+                message="Please select at least one aspect."
+            )
+        else:
+            self.t_aspect_general.destroy()
+            self.t_aspect_general = None
+            self.selected_obj = []
+            self.selected_sign = []
+            self.selection = "Aspect-General"
+
     def select_tables(self, checkbuttons: dict = {}):
         self.selected = []
         for i, j in enumerate(ASPECTS):
@@ -2227,6 +2427,7 @@ class App(tk.Menu):
             self.t_aspect_dist_acc_to_objects = None
             self.selected_obj = []
             self.selected_sign = []
+            self.selection = "Aspect-Detailed"
 
     def aspect_dist_acc_to_objects(self):
         self.t_aspect_dist_acc_to_objects = tk.Toplevel()
