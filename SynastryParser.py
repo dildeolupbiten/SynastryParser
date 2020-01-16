@@ -2362,7 +2362,7 @@ class App(tk.Menu):
             if j != "null":
                 self.checkbutton(
                     master=left_cb_frame,
-                    text=j,
+                    text=j.replace("_", "-"),
                     row=i,
                     column=0,
                     checkbuttons=checkbuttons
@@ -2393,6 +2393,8 @@ class App(tk.Menu):
     def select_aspects(self, checkbuttons={}):
         self.selected = []
         for i, j in enumerate(ASPECTS):
+            if "_" in j:
+                j = j.replace("_", "-")
             if j != "null" and checkbuttons[j][1].get() == "1":
                 self.selected.append(j)
         if checkbuttons["All Aspects"][1].get() == "1":
