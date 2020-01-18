@@ -3077,7 +3077,7 @@ class App(tk.Menu):
             )
         developed_by, _developed_by = "Developed By:", \
             "Tanberk Celalettin Kutlu"
-        thanks_to, _thanks_to = "Thanks To:", "Flavia Alonso"
+        thanks_to, _thanks_to = "Thanks To:", "Flavia Alonzo"
         cura = "C.U.R.A."
         blank, _thanks_to_ = " " * len("Thanks To:"), cura
         contact, _contact = "Contact:", "tckutlu@gmail.com"
