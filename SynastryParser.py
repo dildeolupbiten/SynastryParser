@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.6"
-
+__version__ = "1.2.7"
 import os
 import sys
 import ssl
@@ -314,7 +313,7 @@ def from_local_to_utc(
     )
     local_time = global_time.replace(tzinfo=local_zone)
     utc_time = local_time.astimezone(utc_zone)
-    return utc_time.hour, utc_time.minute, utc_time.second
+    return utc_time.day, utc_time.hour, utc_time.minute, utc_time.second
 
 
 def convert_raw_data():
@@ -334,7 +333,7 @@ def convert_raw_data():
     size = len(data)
     now = time.time()
     for i in range(len(readlines), len(data)):
-        utc_hour, utc_minute, utc_second = from_local_to_utc(
+        utc_day, utc_hour, utc_minute, utc_second = from_local_to_utc(
             year=int(data[i][0]),
             month=int(data[i][1]),
             day=int(data[i][2]),
@@ -346,7 +345,7 @@ def convert_raw_data():
         jd = julday(
             year=int(data[i][0]),
             month=int(data[i][1]),
-            day=int(data[i][2]),
+            day=utc_day,
             hour=utc_hour,
             minute=utc_minute,
             second=utc_second
@@ -481,7 +480,7 @@ class Chart:
         return degree + 30 * SIGNS.index(sign)
 
     def planet_pos(self, planet: int = 0):
-        calc = self.convert_angle(angle=swe.calc(self.jd, planet)[0])
+        calc = self.convert_angle(angle=swe.calc_ut(self.jd, planet)[0])
         return calc[1], self.reverse_convert_angle(calc[0], calc[1])
 
     def house_pos(self):
@@ -3077,7 +3076,7 @@ class App(tk.Menu):
             )
         developed_by, _developed_by = "Developed By:", \
             "Tanberk Celalettin Kutlu"
-        thanks_to, _thanks_to = "Thanks To:", "Flavia Alonzo"
+        thanks_to, _thanks_to = "Thanks To:", "Flavia Alonso"
         cura = "C.U.R.A."
         blank, _thanks_to_ = " " * len("Thanks To:"), cura
         contact, _contact = "Contact:", "tckutlu@gmail.com"
