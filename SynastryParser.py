@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
+
 import os
 import sys
 import ssl
@@ -313,7 +314,8 @@ def from_local_to_utc(
     )
     local_time = global_time.replace(tzinfo=local_zone)
     utc_time = local_time.astimezone(utc_zone)
-    return utc_time.day, utc_time.hour, utc_time.minute, utc_time.second
+    return utc_time.year, utc_time.month, utc_time.day, \
+        utc_time.hour, utc_time.minute, utc_time.second
 
 
 def convert_raw_data():
@@ -333,18 +335,19 @@ def convert_raw_data():
     size = len(data)
     now = time.time()
     for i in range(len(readlines), len(data)):
-        utc_day, utc_hour, utc_minute, utc_second = from_local_to_utc(
-            year=int(data[i][0]),
-            month=int(data[i][1]),
-            day=int(data[i][2]),
-            hour=int(data[i][3]),
-            minute=int(data[i][4]),
-            lat=data[i][5],
-            lon=data[i][6]
-        )
+        utc_year, utc_month, utc_day, utc_hour, utc_minute, \
+            utc_second = from_local_to_utc(
+                year=int(data[i][0]),
+                month=int(data[i][1]),
+                day=int(data[i][2]),
+                hour=int(data[i][3]),
+                minute=int(data[i][4]),
+                lat=data[i][5],
+                lon=data[i][6]
+            )
         jd = julday(
-            year=int(data[i][0]),
-            month=int(data[i][1]),
+            year=utc_year,
+            month=utc_month,
             day=utc_day,
             hour=utc_hour,
             minute=utc_minute,
@@ -517,25 +520,25 @@ class Chart:
                 if i != 11:
                     if hp[i] < planet[1] < hp[i + 1]:
                         house = i + 1
-                        break                        
+                        break
                     elif hp[i] < planet[1] > hp[i + 1] \
-                            and hp[i] - hp[i + 1] > 240: 
+                            and hp[i] - hp[i + 1] > 240:
                         house = i + 1
                         break
                     elif hp[i] > planet[1] < hp[i + 1] \
-                            and hp[i] - hp[i + 1] > 240: 
+                            and hp[i] - hp[i + 1] > 240:
                         house = i + 1
                         break
                 else:
                     if hp[i] < planet[1] < hp[0]:
                         house = i + 1
-                        break                        
+                        break
                     elif hp[i] < planet[1] > hp[0] \
-                            and hp[i] - hp[0] > 240: 
+                            and hp[i] - hp[0] > 240:
                         house = i + 1
                         break
                     elif hp[i] > planet[1] < hp[0] \
-                            and hp[i] - hp[0] > 240: 
+                            and hp[i] - hp[0] > 240:
                         house = i + 1
                         break
             planet_info = [
@@ -774,25 +777,25 @@ def synastry_pos(chart1: list = [], chart2: list = []):
             if i != 11:
                 if hp[i] < planet[1] < hp[i + 1]:
                     house = i + 1
-                    break                        
+                    break
                 elif hp[i] < planet[1] > hp[i + 1] \
-                        and hp[i] - hp[i + 1] > 240: 
+                        and hp[i] - hp[i + 1] > 240:
                     house = i + 1
                     break
                 elif hp[i] > planet[1] < hp[i + 1] \
-                        and hp[i] - hp[i + 1] > 240: 
+                        and hp[i] - hp[i + 1] > 240:
                     house = i + 1
                     break
             else:
                 if hp[i] < planet[1] < hp[0]:
                     house = i + 1
-                    break                        
+                    break
                 elif hp[i] < planet[1] > hp[0] \
-                        and hp[i] - hp[0] > 240: 
+                        and hp[i] - hp[0] > 240:
                     house = i + 1
                     break
                 elif hp[i] > planet[1] < hp[0] \
-                        and hp[i] - hp[0] > 240: 
+                        and hp[i] - hp[0] > 240:
                     house = i + 1
                     break
         chart1[0][ind].append(f"H{house}")
@@ -970,7 +973,7 @@ class Spreadsheet(xlwt.Workbook):
         if aspect == "all":
             label = f"{aspect.upper()}"
         else:
-            label = f"{aspect.upper()} "\
+            label = f"{aspect.upper()} " \
                     f"(Orb Factor: +- {eval(aspect.upper())})"
         self.sheet.write_merge(
             r1=0 + self.size,
@@ -1754,7 +1757,7 @@ class App(tk.Menu):
                 c2=i[0][1] + 15,
                 label=i[1],
                 style=self.style
-            )        
+            )
         elif "csv" in i[1]:
             self.style.font = font(bold=False)
             new_sheet.write_merge(
@@ -1815,11 +1818,11 @@ class App(tk.Menu):
             if file.startswith("part") and file.endswith("xlsx")
         ]
         if self.selection == "Aspect-General":
-            msg = "Calculation of 'General aspect distributions' "\
-                "is completed."
+            msg = "Calculation of 'General aspect distributions' " \
+                  "is completed."
         else:
-            msg = "Calculation of 'Aspect distributions of objects' "\
-                "is completed."
+            msg = "Calculation of 'Aspect distributions of objects' " \
+                  "is completed."
         index = 2
         s = len(datas())
         c = 1
@@ -1866,7 +1869,6 @@ class App(tk.Menu):
             self.master.update()
             logging.info(msg)
             msgbox.showinfo(message=msg)
-
 
     def start(
             self,
@@ -1939,7 +1941,7 @@ class App(tk.Menu):
                 logging.info(f"Merging the separated files...")
                 self.run()
             except:
-                pass      
+                pass
         elif self.selection == "Aspect-Detailed":
             try:
                 file = filedialog.askopenfilename(
@@ -2321,14 +2323,14 @@ class App(tk.Menu):
         main_frame = tk.Frame(master=self.t_aspect_general)
         main_frame.pack()
         left_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
+            master=main_frame,
+            bd=1,
             relief="sunken"
         )
         left_frame.pack(side="left", fill="both")
         mid_frame = tk.Frame(
-            master=main_frame, 
-            bd=1, 
+            master=main_frame,
+            bd=1,
             relief="sunken"
         )
         mid_frame.pack(side="left", fill="both")
@@ -2350,7 +2352,6 @@ class App(tk.Menu):
         mid_cb_frame.pack()
         checkbuttons = {}
         check_all_1 = tk.BooleanVar()
-        check_all_2 = tk.BooleanVar()
         check_uncheck_1 = tk.Checkbutton(
             master=left_cb_frame,
             text="Check/Uncheck All",
@@ -2388,7 +2389,7 @@ class App(tk.Menu):
             command=lambda: self.select_aspects(checkbuttons)
         )
         apply_button.pack(side="bottom")
-        
+
     def select_aspects(self, checkbuttons={}):
         self.selected = []
         for i, j in enumerate(ASPECTS):
@@ -3070,18 +3071,18 @@ class App(tk.Menu):
         version, _version = "Version:", __version__
         build_date, _build_date = "Built Date:", "02.01.2020"
         update_date, _update_date = "Update Date:", \
-            dt.strftime(
-                dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime),
-                "%d.%m.%Y"
-            )
+                                    dt.strftime(
+                                        dt.fromtimestamp(os.stat(sys.argv[0]).st_mtime),
+                                        "%d.%m.%Y"
+                                    )
         developed_by, _developed_by = "Developed By:", \
-            "Tanberk Celalettin Kutlu"
+                                      "Tanberk Celalettin Kutlu"
         thanks_to, _thanks_to = "Thanks To:", "Flavia Alonso"
         cura = "C.U.R.A."
         blank, _thanks_to_ = " " * len("Thanks To:"), cura
         contact, _contact = "Contact:", "tckutlu@gmail.com"
         github, _github = "GitHub:", \
-            "https://github.com/dildeolupbiten/SynastryParser"
+                          "https://github.com/dildeolupbiten/SynastryParser"
         tframe1 = tk.Frame(master=tl, bd="2", relief="groove")
         tframe1.pack(fill="both")
         tframe2 = tk.Frame(master=tl)
@@ -3111,9 +3112,9 @@ class App(tk.Menu):
                     lambda event: self.callback(url1))
             elif j == _contact:
                 tlabel_info_2 = tk.Label(
-                    master=tframe2, 
+                    master=tframe2,
                     text=j,
-                    font="Arial 11", 
+                    font="Arial 11",
                     fg="blue",
                     cursor="hand2"
                 )
@@ -3123,9 +3124,9 @@ class App(tk.Menu):
                     lambda event: self.callback(url2))
             elif j == _thanks_to_:
                 tlabel_info_2 = tk.Label(
-                    master=tframe2, 
+                    master=tframe2,
                     text=j,
-                    font="Arial 11", 
+                    font="Arial 11",
                     fg="blue",
                     cursor="hand2"
                 )
@@ -3135,7 +3136,7 @@ class App(tk.Menu):
                     lambda event: self.callback(url3))
             else:
                 tlabel_info_2 = tk.Label(
-                    master=tframe2, 
+                    master=tframe2,
                     text=j,
                     font="Arial 11"
                 )
