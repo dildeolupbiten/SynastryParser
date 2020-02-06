@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__version__ = "1.2.8"
+__version__ = "1.2.9"
 
 import os
 import sys
@@ -775,26 +775,26 @@ def synastry_pos(chart1: list = [], chart2: list = []):
         house = 0
         for i in range(12):
             if i != 11:
-                if hp[i] < planet[1] < hp[i + 1]:
+                if hp[i] < planet[2] < hp[i + 1]:
                     house = i + 1
                     break
-                elif hp[i] < planet[1] > hp[i + 1] \
+                elif hp[i] < planet[2] > hp[i + 1] \
                         and hp[i] - hp[i + 1] > 240:
                     house = i + 1
                     break
-                elif hp[i] > planet[1] < hp[i + 1] \
+                elif hp[i] > planet[2] < hp[i + 1] \
                         and hp[i] - hp[i + 1] > 240:
                     house = i + 1
                     break
             else:
-                if hp[i] < planet[1] < hp[0]:
+                if hp[i] < planet[2] < hp[0]:
                     house = i + 1
                     break
-                elif hp[i] < planet[1] > hp[0] \
+                elif hp[i] < planet[2] > hp[0] \
                         and hp[i] - hp[0] > 240:
                     house = i + 1
                     break
-                elif hp[i] > planet[1] < hp[0] \
+                elif hp[i] > planet[2] < hp[0] \
                         and hp[i] - hp[0] > 240:
                     house = i + 1
                     break
@@ -1130,7 +1130,7 @@ class Spreadsheet(xlwt.Workbook):
                 self.save(f"part{str(num).zfill(3)}.xlsx")
             else:
                 pass
-        except TypeError:
+        except:
             pass
 
     def w_object_dist_acc_to_signs_or_houses(
