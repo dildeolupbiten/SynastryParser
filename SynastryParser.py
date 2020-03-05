@@ -92,14 +92,6 @@ except ModuleNotFoundError:
 PATH = os.path.join(os.getcwd(), "Eph", "Whl")
 
 try:
-    import shapely
-except ModuleNotFoundError:
-    select_module(
-        name="shapely",
-        file=[i for i in os.listdir(PATH) if "Shapely" in i]
-        path=PATH
-    )
-try:
     import swisseph as swe
 except ModuleNotFoundError:
     select_module(
