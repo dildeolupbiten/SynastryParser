@@ -26,33 +26,35 @@ logging.basicConfig(
 )
 logging.info("Session started.")
 
-whl_path = os.path.join(os.getcwd(), "Eph", "Whl")
 
-
-def select_module(module_name, module_files):
+def select_module(
+        name: str = "",
+        file: list = [],
+        path: str = ""
+):
     if os.name == "posix":
-        os.system(f"pip3 install {module_name}")
+        os.system(f"pip3 install {name}")
     elif os.name == "nt":
         if sys.version_info.minor == 6:
             if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(whl_path, module_files[0])
+                new_path = os.path.join(path, file[0])
                 os.system(f"pip3 install {new_path}")
             elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(whl_path, module_files[1])
+                new_path = os.path.join(path, file[1])
                 os.system(f"pip3 install {new_path}")
         elif sys.version_info.minor == 7:
             if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(whl_path, module_files[2])
+                new_path = os.path.join(path, file[2])
                 os.system(f"pip3 install {new_path}")
             elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(whl_path, module_files[3])
+                new_path = os.path.join(path, file[3])
                 os.system(f"pip3 install {new_path}")
         elif sys.version_info.minor == 8:
             if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(whl_path, module_files[4])
+                new_path = os.path.join(path, file[4])
                 os.system(f"pip3 install {new_path}")
             elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(whl_path, module_files[5])
+                new_path = os.path.join(path, file[5])
                 os.system(f"pip3 install {new_path}")
 
 
@@ -77,21 +79,6 @@ except ModuleNotFoundError:
     os.system("pip3 install xlrd")
     import xlrd
 try:
-    import shapely
-except ModuleNotFoundError:
-    select_module(
-        "shapely",
-        [i for i in os.listdir(whl_path) if "Shapely" in i]
-    )
-try:
-    import swisseph as swe
-except ModuleNotFoundError:
-    select_module(
-        "pyswisseph",
-        [i for i in os.listdir(whl_path) if "pyswisseph" in i]
-    )
-    import swisseph as swe
-try:
     from dateutil import tz
 except ModuleNotFoundError:
     os.system("pip3 install python-dateutil")
@@ -101,6 +88,26 @@ try:
 except ModuleNotFoundError:
     os.system("pip3 install tzwhere")
     from tzwhere import tzwhere
+    
+PATH = os.path.join(os.getcwd(), "Eph", "Whl")
+
+try:
+    import shapely
+except ModuleNotFoundError:
+    select_module(
+        name="shapely",
+        file=[i for i in os.listdir(PATH) if "Shapely" in i]
+        path=PATH
+    )
+try:
+    import swisseph as swe
+except ModuleNotFoundError:
+    select_module(
+        name="pyswisseph",
+        file=[i for i in os.listdir(PATH) if "pyswisseph" in i],
+        path=PATH
+    )
+    import swisseph as swe
 
 swe.set_ephe_path(os.path.join(os.getcwd(), "Eph"))
 
