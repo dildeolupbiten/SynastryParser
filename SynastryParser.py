@@ -19,45 +19,6 @@ import tkinter.messagebox as msgbox
 from tkinter import filedialog
 from datetime import datetime as dt
 
-logging.basicConfig(
-    format="- %(levelname)s - %(asctime)s - %(message)s",
-    level=logging.INFO,
-    datefmt="%d.%m.%Y %H:%M:%S"
-)
-logging.info("Session started.")
-
-
-def select_module(
-        name: str = "",
-        file: list = [],
-        path: str = ""
-):
-    if os.name == "posix":
-        os.system(f"pip3 install {name}")
-    elif os.name == "nt":
-        if sys.version_info.minor == 6:
-            if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(path, file[0])
-                os.system(f"pip3 install {new_path}")
-            elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(path, file[1])
-                os.system(f"pip3 install {new_path}")
-        elif sys.version_info.minor == 7:
-            if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(path, file[2])
-                os.system(f"pip3 install {new_path}")
-            elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(path, file[3])
-                os.system(f"pip3 install {new_path}")
-        elif sys.version_info.minor == 8:
-            if platform.architecture()[0] == "32bit":
-                new_path = os.path.join(path, file[4])
-                os.system(f"pip3 install {new_path}")
-            elif platform.architecture()[0] == "64bit":
-                new_path = os.path.join(path, file[5])
-                os.system(f"pip3 install {new_path}")
-
-
 try:
     import numpy as np
 except ModuleNotFoundError:
@@ -89,6 +50,38 @@ except ModuleNotFoundError:
     os.system("pip3 install tzwhere")
     from tzwhere import tzwhere
     
+    
+def select_module(
+        name: str = "",
+        file: list = [],
+        path: str = ""
+):
+    if os.name == "posix":
+        os.system(f"pip3 install {name}")
+    elif os.name == "nt":
+        if sys.version_info.minor == 6:
+            if platform.architecture()[0] == "32bit":
+                new_path = os.path.join(path, file[0])
+                os.system(f"pip3 install {new_path}")
+            elif platform.architecture()[0] == "64bit":
+                new_path = os.path.join(path, file[1])
+                os.system(f"pip3 install {new_path}")
+        elif sys.version_info.minor == 7:
+            if platform.architecture()[0] == "32bit":
+                new_path = os.path.join(path, file[2])
+                os.system(f"pip3 install {new_path}")
+            elif platform.architecture()[0] == "64bit":
+                new_path = os.path.join(path, file[3])
+                os.system(f"pip3 install {new_path}")
+        elif sys.version_info.minor == 8:
+            if platform.architecture()[0] == "32bit":
+                new_path = os.path.join(path, file[4])
+                os.system(f"pip3 install {new_path}")
+            elif platform.architecture()[0] == "64bit":
+                new_path = os.path.join(path, file[5])
+                os.system(f"pip3 install {new_path}")
+
+    
 PATH = os.path.join(os.getcwd(), "Eph", "Whl")
 
 try:
@@ -100,6 +93,13 @@ except ModuleNotFoundError:
         path=PATH
     )
     import swisseph as swe
+    
+logging.basicConfig(
+    format="- %(levelname)s - %(asctime)s - %(message)s",
+    level=logging.INFO,
+    datefmt="%d.%m.%Y %H:%M:%S"
+)
+logging.info("Session started.")
 
 swe.set_ephe_path(os.path.join(os.getcwd(), "Eph"))
 
