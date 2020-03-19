@@ -482,7 +482,7 @@ class Chart:
         return degree + 30 * SIGNS.index(sign)
 
     def planet_pos(self, planet: int = 0):
-        calc = self.convert_angle(angle=swe.calc_ut(self.jd, planet)[0])
+        calc = self.convert_angle(angle=swe.calc(self.jd, planet)[0])
         return calc[1], self.reverse_convert_angle(calc[0], calc[1])
 
     def house_pos(self):
